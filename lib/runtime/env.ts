@@ -1,0 +1,24 @@
+function readFromProcessEnv(key: string) {
+  if (typeof process !== "undefined" && process?.env) {
+    const value = process.env[key]
+    if (typeof value === "string") {
+      return value
+    }
+  }
+
+  return undefined
+}
+
+function readFromDenoEnv(key: string) {
+  const deno = (globalThis as { Deno?: { env?: { get?: (name: string) => string | undefined } } }).Deno
+
+  if (deno?.env?.get) {
+    return deno.env.get(key)
+  }
+
+  return undefined
+}
+
+export function readRuntimeEnv(key: string) {
+  return readFromProcessEnv(key) ?? readFromDenoEnv(key)
+}

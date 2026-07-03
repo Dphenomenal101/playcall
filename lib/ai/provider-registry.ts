@@ -1,0 +1,295 @@
+export type ProviderCredentialFieldKind = "apiKey" | "text" | "secret" | "json"
+
+export interface ProviderCredentialField {
+  key: string
+  label: string
+  kind: ProviderCredentialFieldKind
+  placeholder?: string
+  required?: boolean
+  helperText?: string
+}
+
+export interface ProviderRegistryEntry {
+  id: string
+  label: string
+  roles: Array<"llm" | "enrichment" | "document_parsing">
+  capabilityFlags: string[]
+  defaultModel?: string
+  modelPlaceholder?: string
+  // Curated model ids selectable from the settings dropdown. Providers
+  // without a fixed catalog (e.g. gateways that proxy arbitrary models)
+  // omit this and fall back to a free-text model id input.
+  models?: string[]
+  credentialFields: ProviderCredentialField[]
+  runtimeSupported?: boolean
+  // Where to get an API key for this provider
+  apiKeyUrl?: string
+}
+
+const llmProviders: ProviderRegistryEntry[] = [
+  {
+    id: "openai",
+    label: "OpenAI",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage", "fallback_ready"],
+    defaultModel: "gpt-5-mini",
+    modelPlaceholder: "gpt-5-mini",
+    models: ["gpt-5.5", "gpt-5.4", "gpt-5.4-mini", "gpt-5.2", "gpt-5.1", "gpt-5", "gpt-5-mini", "gpt-5-nano", "gpt-4.1", "gpt-4.1-mini", "gpt-4o"],
+    credentialFields: [{ key: "apiKey", label: "OpenAI API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://platform.openai.com/api-keys",
+  },
+  {
+    id: "anthropic",
+    label: "Anthropic",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage", "fallback_ready"],
+    defaultModel: "claude-sonnet-4-6",
+    modelPlaceholder: "claude-sonnet-4-6",
+    models: ["claude-opus-4-8", "claude-opus-4-7", "claude-opus-4-6", "claude-sonnet-4-6", "claude-sonnet-4-5", "claude-haiku-4-5"],
+    credentialFields: [{ key: "apiKey", label: "Anthropic API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://console.anthropic.com/settings/keys",
+  },
+  {
+    id: "google",
+    label: "Google Generative AI",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    // gemini-3-pro(-preview) was shut down March 2026 and migrated to
+    // gemini-3.1-pro-preview - defaulting to 3.5 Flash since it's GA/stable
+    // rather than the still-"preview" Pro tier, which is more likely to move.
+    defaultModel: "gemini-3.5-flash",
+    modelPlaceholder: "gemini-3.5-flash",
+    models: ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-3.1-pro-preview"],
+    credentialFields: [{ key: "apiKey", label: "Google AI API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://aistudio.google.com/app/apikey",
+  },
+  {
+    id: "google-vertex",
+    label: "Google Vertex",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    runtimeSupported: false,
+    defaultModel: "gemini-3.5-flash",
+    modelPlaceholder: "gemini-3.5-flash",
+    models: ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-3.1-pro-preview"],
+    credentialFields: [
+      { key: "project", label: "Vertex project", kind: "text", required: true },
+      { key: "location", label: "Vertex location", kind: "text", required: true, placeholder: "us-central1" },
+      { key: "clientEmail", label: "Service account email", kind: "text", required: true },
+      { key: "privateKey", label: "Service account private key", kind: "secret", required: true },
+    ],
+    apiKeyUrl: "https://cloud.google.com/vertex-ai/generative-ai/docs/start/quickstarts/quickstart-multimodal",
+  },
+  {
+    id: "xai",
+    label: "xAI",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    defaultModel: "grok-4.3",
+    modelPlaceholder: "grok-4.3",
+    models: ["grok-4.3", "grok-4.1", "grok-4", "grok-4-fast"],
+    credentialFields: [{ key: "apiKey", label: "xAI API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://console.x.ai/",
+  },
+  {
+    id: "mistral",
+    label: "Mistral",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    defaultModel: "mistral-large-latest",
+    modelPlaceholder: "mistral-large-latest",
+    models: ["mistral-large-latest", "mistral-small-latest", "open-mixtral-8x22b"],
+    credentialFields: [{ key: "apiKey", label: "Mistral API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://console.mistral.ai/api-keys/",
+  },
+  {
+    id: "cohere",
+    label: "Cohere",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    runtimeSupported: false,
+    defaultModel: "command-r-plus",
+    modelPlaceholder: "command-r-plus",
+    models: ["command-r-plus", "command-r"],
+    credentialFields: [{ key: "apiKey", label: "Cohere API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://dashboard.cohere.com/api-keys",
+  },
+  {
+    id: "deepseek",
+    label: "DeepSeek",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    // DeepSeek's API only implements response_format "json_object" (loose JSON,
+    // no schema enforcement) - "json_schema" returns "This response_format type
+    // is unavailable now." on every model, and AI SDK v6's generateObject always
+    // sends json_schema when a schema is provided. There's no model swap that
+    // fixes this (it's an API-wide gap, not a per-model one), so this stays
+    // disabled until DeepSeek ships json_schema support.
+    runtimeSupported: false,
+    defaultModel: "deepseek-chat",
+    modelPlaceholder: "deepseek-chat",
+    models: ["deepseek-chat", "deepseek-reasoner"],
+    credentialFields: [{ key: "apiKey", label: "DeepSeek API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://platform.deepseek.com/api_keys",
+  },
+  {
+    id: "groq",
+    label: "Groq",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    // AI SDK v6's generateObject always sends response_format: json_schema
+    // (there's no tool-calling fallback for object generation anymore) - confirmed
+    // live that llama-3.3-70b-versatile rejects that response format with
+    // "This model does not support response format `json_schema`". Only models
+    // Groq's own structured-outputs docs list as supporting json_schema belong
+    // here: https://console.groq.com/docs/structured-outputs#supported-models
+    defaultModel: "openai/gpt-oss-120b",
+    modelPlaceholder: "openai/gpt-oss-120b",
+    models: ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "openai/gpt-oss-safeguard-20b", "meta-llama/llama-4-scout-17b-16e-instruct"],
+    credentialFields: [{ key: "apiKey", label: "Groq API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://console.groq.com/keys",
+  },
+  {
+    id: "together",
+    label: "Together AI",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    // 3.3 (not 3.1) is the version Together's own structured-outputs docs
+    // confirm as json_schema-compatible.
+    defaultModel: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    modelPlaceholder: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    credentialFields: [{ key: "apiKey", label: "Together API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://api.together.ai/settings/api-keys",
+  },
+  {
+    id: "fireworks",
+    label: "Fireworks",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    // The only model Fireworks' own structured-responses docs confirm by name
+    // for json_schema support; their model catalog doesn't otherwise spell out
+    // per-model support.
+    defaultModel: "accounts/fireworks/models/kimi-k2p5",
+    modelPlaceholder: "accounts/fireworks/models/kimi-k2p5",
+    credentialFields: [{ key: "apiKey", label: "Fireworks API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://fireworks.ai/account/api-keys",
+  },
+  {
+    id: "alibaba",
+    label: "Alibaba",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    // DashScope's OpenAI-compatible endpoint only documents response_format
+    // "json_object" - there is no json_schema support at all on this endpoint
+    // (confirmed via Alibaba Cloud's own JSON-mode docs), so every model fails
+    // the same way regardless of which one is picked. Disabled until Alibaba
+    // ships json_schema on this endpoint.
+    runtimeSupported: false,
+    defaultModel: "qwen-plus",
+    modelPlaceholder: "qwen-plus",
+    credentialFields: [{ key: "apiKey", label: "Alibaba API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://bailian.console.aliyun.com/",
+  },
+  {
+    id: "deepinfra",
+    label: "DeepInfra",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    defaultModel: "meta-llama/Meta-Llama-3.1-70B-Instruct",
+    modelPlaceholder: "meta-llama/Meta-Llama-3.1-70B-Instruct",
+    credentialFields: [{ key: "apiKey", label: "DeepInfra API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://deepinfra.com/dash/api_keys",
+  },
+  {
+    id: "cerebras",
+    label: "Cerebras",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    defaultModel: "llama-3.3-70b",
+    modelPlaceholder: "llama-3.3-70b",
+    credentialFields: [{ key: "apiKey", label: "Cerebras API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://cloud.cerebras.ai/",
+  },
+  {
+    id: "huggingface",
+    label: "Hugging Face",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    defaultModel: "meta-llama/Meta-Llama-3.1-70B-Instruct",
+    modelPlaceholder: "meta-llama/Meta-Llama-3.1-70B-Instruct",
+    credentialFields: [{ key: "apiKey", label: "Hugging Face token", kind: "secret", required: true }],
+    apiKeyUrl: "https://huggingface.co/settings/tokens",
+  },
+  {
+    id: "baseten",
+    label: "Baseten",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    runtimeSupported: false,
+    modelPlaceholder: "your-deployment-model",
+    credentialFields: [
+      { key: "apiKey", label: "Baseten API key", kind: "secret", required: true },
+      { key: "deploymentId", label: "Deployment ID", kind: "text", required: true },
+    ],
+    apiKeyUrl: "https://app.baseten.co/settings/account/api_keys",
+  },
+  {
+    id: "moonshot",
+    label: "Moonshot AI",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage"],
+    // kimi-k2-0711-preview is not in Moonshot's documented json_schema-capable
+    // model list (kimi-k2.5+, moonshot-v1-* only) - swapped to their current
+    // flagship that is.
+    defaultModel: "kimi-k2.5",
+    modelPlaceholder: "kimi-k2.5",
+    credentialFields: [{ key: "apiKey", label: "Moonshot API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://platform.moonshot.cn/console/api-keys",
+  },
+  {
+    id: "vercel",
+    label: "Vercel AI Gateway",
+    roles: ["llm"],
+    capabilityFlags: ["object_generation", "tool_usage", "fallback_ready"],
+    modelPlaceholder: "openai/gpt-4.1-mini",
+    credentialFields: [{ key: "apiKey", label: "Vercel AI Gateway key", kind: "secret", required: true }],
+    apiKeyUrl: "https://vercel.com/docs/ai-gateway",
+  },
+]
+
+const enrichmentProviders: ProviderRegistryEntry[] = [
+  {
+    id: "exa",
+    label: "Exa",
+    roles: ["enrichment"],
+    capabilityFlags: ["company_enrichment", "contact_enrichment", "account_context"],
+    credentialFields: [{ key: "apiKey", label: "Exa API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://dashboard.exa.ai/api-keys",
+  },
+]
+
+const documentParsingProviders: ProviderRegistryEntry[] = [
+  {
+    id: "llamaparse",
+    label: "LlamaParse",
+    roles: ["document_parsing"],
+    capabilityFlags: ["document_parsing", "visual_extraction", "table_extraction"],
+    credentialFields: [{ key: "apiKey", label: "LlamaParse API key", kind: "secret", required: true }],
+    apiKeyUrl: "https://cloud.llamaindex.ai/api-key",
+  },
+]
+
+export const providerRegistry = [...llmProviders, ...enrichmentProviders, ...documentParsingProviders]
+
+export function getProviderRegistryEntry(providerId: string) {
+  return providerRegistry.find((provider) => provider.id === providerId) ?? null
+}
+
+export function isProviderRuntimeSupported(providerId: string) {
+  const provider = getProviderRegistryEntry(providerId)
+  return provider?.runtimeSupported !== false
+}
+
+export function getProvidersForRole(role: "llm" | "enrichment" | "document_parsing") {
+  return providerRegistry.filter((provider) => provider.roles.includes(role) && provider.runtimeSupported !== false)
+}

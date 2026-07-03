@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "paths": {}
+  },
+  "imports": {
+    "@/lib/ai/provider-registry": "../../../lib/ai/provider-registry.ts",
+    "@/lib/ai/providers": "../../../lib/ai/providers.ts",
+    "@/lib/data/auth": "../../../lib/data/auth.ts",
+    "@/lib/data/live-analytics": "../../../lib/data/live-analytics.ts",
+    "@/lib/data/workspace-types": "../../../lib/data/workspace-types.ts",
+    "@/lib/extraction/audio": "../../../lib/extraction/audio.ts",
+    "@/lib/extraction/document": "../../../lib/extraction/document.ts",
+    "@/lib/integrations/llamaparse": "../../../lib/integrations/llamaparse.ts",
+    "@/lib/integrations/types": "../../../lib/integrations/types.ts",
+    "@/lib/jobs/dispatch": "../../../lib/jobs/dispatch.ts",
+    "@/lib/jobs/error-messages": "../../../lib/jobs/error-messages.ts",
+    "@/lib/jobs/rubric": "../../../lib/jobs/rubric.ts",
+    "@/lib/jobs/service": "../../../lib/jobs/service.ts",
+    "@/lib/playcall-data": "../../../lib/playcall-data.ts",
+    "@/lib/security/encryption": "../../../lib/security/encryption.ts",
+    "@/lib/supabase/admin": "../../../lib/supabase/admin.ts",
+    "@/lib/supabase/env": "../../../lib/supabase/env.ts",
+    "@/lib/supabase/server": "../../../lib/supabase/server.ts",
+    "@ai-sdk/anthropic": "npm:@ai-sdk/anthropic@3",
+    "@ai-sdk/openai": "npm:@ai-sdk/openai@3",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2",
+    "ai": "npm:ai@6",
+    "exa-js": "npm:exa-js@2",
+    "zod": "npm:zod@3"
+  }
+}

@@ -1,0 +1,53 @@
+import Exa from "exa-js"
+import { readRuntimeEnv } from "../runtime/env"
+
+export function hasExaConfig(apiKey?: string) {
+  return Boolean(apiKey ?? readRuntimeEnv("EXA_API_KEY"))
+}
+
+export function createExaClient(overrideApiKey?: string) {
+  const apiKey = overrideApiKey ?? readRuntimeEnv("EXA_API_KEY")
+
+  if (!apiKey) {
+    throw new Error("Missing EXA_API_KEY")
+  }
+
+  return new Exa(apiKey)
+}
+
+export async function enrichCompanyAndContact({
+  companyQuery,
+  peopleQuery,
+}: {
+  companyQuery: string
+  peopleQuery: string
+}) {
+  if (!hasExaConfig()) {
+    return {
+      company: null,
+      contact: null,
+    }
+  }
+
+  const exa = createExaClient()
+
+  const [company, contact] = await Promise.all([
+    exa.searchAndContents(companyQuery, {
+      category: "company",
+      type: "auto",
+      highlights: true,
+      numResults: 5,
+    }),
+    exa.searchAndContents(peopleQuery, {
+      category: "people",
+      type: "auto",
+      highlights: true,
+      numResults: 5,
+    }),
+  ])
+
+  return {
+    company,
+    contact,
+  }
+}

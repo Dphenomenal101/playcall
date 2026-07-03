@@ -1,0 +1,834 @@
+export type PlaybookStatus = "draft" | "published" | "archived"
+
+// Canonical call-type options shared by the playbook builder's "applicable
+// call types" picker and the rep upload flow's "call type" select - these
+// used to be two different, differently-cased lists that didn't line up.
+export const CALL_TYPES: Array<{ value: string; label: string }> = [
+  { value: "discovery", label: "Discovery" },
+  { value: "demo", label: "Demo" },
+  { value: "follow-up", label: "Follow-up" },
+  { value: "negotiation", label: "Negotiation" },
+  { value: "renewal", label: "Renewal" },
+  { value: "expansion", label: "Expansion" },
+  { value: "kickoff", label: "Kickoff" },
+  { value: "check-in", label: "Check-in" },
+]
+
+// Canonical deal-stage options, matching the rep upload flow's "deal stage
+// before/after" selects (lib/playcall-data.ts values are stored kebab-case).
+export const DEAL_STAGES: Array<{ value: string; label: string }> = [
+  { value: "unaware", label: "Unaware" },
+  { value: "problem-aware", label: "Problem-aware" },
+  { value: "solution-aware", label: "Solution-aware" },
+  { value: "vendor-evaluating", label: "Vendor evaluating" },
+  { value: "committed", label: "Committed" },
+  { value: "closed-lost", label: "Closed lost" },
+]
+
+// Canonical outcome options. `value` is the kebab-case form used by the rep
+// upload flow; `dbValue` is the space-separated form actually stored in the
+// outcome_status Postgres enum (see OUTCOME_STATUS_BY_KEBAB).
+export const OUTCOMES: Array<{ value: string; label: string; dbValue: string }> = [
+  { value: "no-show", label: "No-show", dbValue: "no-show" },
+  { value: "next-step-booked", label: "Next step booked", dbValue: "next step booked" },
+  { value: "moved-stage", label: "Moved stage", dbValue: "moved stage" },
+  { value: "no-advancement", label: "No advancement", dbValue: "no advancement" },
+  { value: "closed-won", label: "Closed won", dbValue: "closed won" },
+  { value: "closed-lost", label: "Closed lost", dbValue: "closed lost" },
+]
+
+// Normalizes call-type/stage/outcome strings for filter comparisons. The demo
+// fixture data below uses display casing ("Discovery", "Problem-aware") while
+// the live Supabase mapper lowercases call types/stages but turns the
+// "no-show" outcome enum value into "no show" (dash -> space) - lowercasing
+// and collapsing dashes to spaces on both sides of a comparison makes every
+// variant line up with the canonical option values above.
+export function normalizeFilterValue(value: string | null | undefined) {
+  return (value ?? "").toLowerCase().replace(/-/g, " ").trim()
+}
+
+export interface PlaybookCategory {
+  id: string
+  name: string
+  weight: number
+  criteria: string[]
+}
+
+export interface PlaybookSourceDocument {
+  id: string
+  name: string
+  type: "prompt" | "pdf" | "docx" | "txt" | "csv" | "pptx" | "markdown"
+  updatedAt: string
+  status: "attached" | "failed" | "processing"
+  error?: string | null
+}
+
+export interface PlaybookRecord {
+  id: string
+  slug: string
+  name: string
+  description: string
+  notes?: string
+  segment: string
+  callTypes: string[]
+  methodology: string
+  status: PlaybookStatus
+  reps: number
+  calls: number
+  adherence: number
+  updated: string
+  sourceTypes: string[]
+  sourceDocuments: PlaybookSourceDocument[]
+  categories: PlaybookCategory[]
+  /** Live async rubric/ingestion processing state. Demo data omits this; treat as "ready". */
+  processingStatus?: "queued" | "processing" | "ready" | "failed"
+  processingError?: string | null
+  processingProgress?: {
+    phase:
+      | "idle"
+      | "uploading"
+      | "ingesting_sources"
+      | "waiting_for_rubric"
+      | "generating_rubric"
+      | "ready"
+      | "failed"
+    title: string
+    detail: string
+    elapsedLabel?: string
+    sourceCounts: {
+      total: number
+      attached: number
+      processing: number
+      failed: number
+    }
+  }
+}
+
+export interface AccountContext {
+  company: {
+    name: string | null
+    domain: string
+    employeeBand: "1-10" | "11-50" | "51-200" | "201-1000" | "1000+" | null
+    stage: "bootstrapped" | "pre-seed" | "seed" | "series-a" | "series-b-plus" | "public" | "unknown"
+    industry: string | null
+    businessModel: "b2b-saas" | "b2c" | "marketplace" | "services" | "developer-tools" | "other" | null
+    salesMotion: "plg" | "sales-led" | "hybrid" | "enterprise" | "unknown"
+    pricingModel: "self-serve" | "sales-assisted" | "enterprise" | "usage-based" | "unknown"
+    productSummary: string | null
+    targetCustomer: string | null
+    likelyUseCase: string | null
+    relevantTechnologies: string[]
+    recentSignals: Array<{
+      type: "funding" | "hiring" | "product-launch" | "expansion" | "partnership" | "leadership-change" | "other"
+      description: string
+      date: string | null
+    }>
+    buyingStageHypothesis: "unaware" | "problem-aware" | "solution-aware" | "vendor-evaluating" | "committed" | "unknown"
+  }
+  contact: {
+    name: string | null
+    email: string | null
+    linkedinUrl: string | null
+    title: string | null
+    department: string | null
+    seniority: "individual-contributor" | "manager" | "director" | "vp" | "c-suite" | "founder" | "unknown"
+    likelyRoleInPurchase: "user" | "champion" | "evaluator" | "decision-maker" | "economic-buyer" | "unknown"
+  }
+  confidence: {
+    company: number
+    contact: number
+    stage: number
+    salesMotion: number
+  }
+  sources: {
+    company: string[]
+    contact: string[]
+    retrievedAt: string
+  }
+}
+
+export interface ScoreDimension {
+  label: string
+  score: number
+  outOf: number
+  note: string
+  evidence?: Array<{
+    title: string
+    quote: string
+  }>
+}
+
+export interface CallRecord {
+  id: string
+  rep: string
+  company: string
+  playbook: string
+  playbookId: string
+  callType: string
+  dealStageBefore?: string
+  dealStageAfter?: string | null
+  score: number
+  adherence: number
+  outcome: string
+  date: string
+  status: string
+  /** Human-readable reason for a "failed" status. Never raw provider/SDK error text. */
+  processingError?: string | null
+  pipelineAmount?: string | null
+  lossReason?: string | null
+  talkListenRatio?: string | null
+  scoreBreakdown: ScoreDimension[]
+  missedQuestions: string[]
+  missedOpportunities: string[]
+  productInaccuracies: string[]
+  accountContext: AccountContext
+  transcriptEvidence: Array<{
+    title: string
+    quote: string
+  }>
+  bestMoment: string
+  topMissedMoment: string
+  buyerAwareFeedback?: string
+  recommendedDrill: string
+  coachingComments?: Array<{
+    id: string
+    author: string
+    body: string
+    createdAt: string
+  }>
+}
+
+export interface RepAssignment {
+  id: string
+  name: string
+  email: string
+  role: string
+  status: string
+  avgScore: number
+  previousScore: number
+  callsAnalyzed: number
+  winRate: string
+  playbooks: string[]
+}
+
+export interface PendingInvite {
+  id: string
+  email: string
+  role: "Sales Rep" | "Manager"
+  playbooks: string[]
+  sentAt: string
+  status: "pending" | "expired"
+}
+
+export const playbooks: PlaybookRecord[] = [
+  {
+    id: "pb-enterprise-discovery",
+    slug: "enterprise-discovery",
+    name: "Enterprise Discovery",
+    description: "Discovery and early demo scoring for larger, multi-threaded accounts.",
+    segment: "Enterprise",
+    callTypes: ["Discovery", "Demo"],
+    methodology: "MEDDICC",
+    status: "published",
+    reps: 8,
+    calls: 67,
+    adherence: 84,
+    updated: "Jun 18, 2026",
+    sourceTypes: ["Prompt", "PDF", "DOCX", "PPTX"],
+    sourceDocuments: [
+      { id: "src-001", name: "enterprise-discovery-prompt", type: "prompt", updatedAt: "Jun 18, 2026", status: "attached" },
+      { id: "src-002", name: "enterprise-playbook.pdf", type: "pdf", updatedAt: "Jun 17, 2026", status: "attached" },
+      { id: "src-003", name: "objection-guide.docx", type: "docx", updatedAt: "Jun 16, 2026", status: "failed" },
+      { id: "src-004", name: "launch-messaging.pptx", type: "pptx", updatedAt: "Jun 12, 2026", status: "attached" },
+    ],
+    categories: [
+      {
+        id: "cat-discovery",
+        name: "Discovery",
+        weight: 20,
+        criteria: [
+          "Asked about current process pain points",
+          "Understood urgency and business context",
+          "Adapted questions to company stage and sales motion",
+        ],
+      },
+      {
+        id: "cat-qualification",
+        name: "Qualification",
+        weight: 20,
+        criteria: [
+          "Confirmed budget authority",
+          "Identified decision process",
+          "Mapped the likely role in purchase",
+        ],
+      },
+      {
+        id: "cat-objections",
+        name: "Objection Handling",
+        weight: 15,
+        criteria: [
+          "Handled pricing pushback without losing momentum",
+          "Responded to stakeholder risk clearly",
+        ],
+      },
+      {
+        id: "cat-product",
+        name: "Product Accuracy",
+        weight: 15,
+        criteria: [
+          "Positioned the product correctly",
+          "Did not overstate functionality",
+        ],
+      },
+      {
+        id: "cat-next-steps",
+        name: "Next-Step Clarity",
+        weight: 15,
+        criteria: [
+          "Secured a concrete next action",
+          "Confirmed owner and timeline",
+        ],
+      },
+      {
+        id: "cat-adherence",
+        name: "Playbook Adherence",
+        weight: 15,
+        criteria: [
+          "Referenced approved messaging",
+          "Stayed aligned to the enterprise motion",
+        ],
+      },
+    ],
+  },
+  {
+    id: "pb-smb-discovery",
+    slug: "smb-discovery",
+    name: "SMB Discovery",
+    description: "Short-cycle qualification and pain discovery for smaller teams.",
+    segment: "SMB",
+    callTypes: ["Discovery"],
+    methodology: "Custom",
+    status: "published",
+    reps: 7,
+    calls: 43,
+    adherence: 81,
+    updated: "Jun 16, 2026",
+    sourceTypes: ["Prompt", "Markdown", "TXT"],
+    sourceDocuments: [
+      { id: "src-005", name: "smb-outline.md", type: "markdown", updatedAt: "Jun 16, 2026", status: "attached" },
+      { id: "src-006", name: "smb-notes.txt", type: "txt", updatedAt: "Jun 14, 2026", status: "attached" },
+    ],
+    categories: [
+      { id: "cat-smb-discovery", name: "Discovery", weight: 25, criteria: ["Quick pain discovery", "Team-size relevance", "Implementation urgency"] },
+      { id: "cat-smb-qualification", name: "Qualification", weight: 20, criteria: ["Budget fit", "Owner identified"] },
+      { id: "cat-smb-product", name: "Product Accuracy", weight: 20, criteria: ["Clear value framing", "Correct product claims"] },
+      { id: "cat-smb-next", name: "Next-Step Clarity", weight: 20, criteria: ["Date and owner confirmed"] },
+      { id: "cat-smb-adherence", name: "Playbook Adherence", weight: 15, criteria: ["Approved positioning used"] },
+    ],
+  },
+  {
+    id: "pb-new-launch-demo",
+    slug: "new-launch-demo",
+    name: "New Launch Demo",
+    description: "Launch-specific demo rubric with new messaging and objection traps.",
+    segment: "Mid-market",
+    callTypes: ["Demo"],
+    methodology: "SPICED",
+    status: "published",
+    reps: 6,
+    calls: 28,
+    adherence: 79,
+    updated: "Jun 10, 2026",
+    sourceTypes: ["Prompt", "PDF", "PPTX"],
+    sourceDocuments: [
+      { id: "src-007", name: "launch-prompt", type: "prompt", updatedAt: "Jun 10, 2026", status: "attached" },
+      { id: "src-008", name: "launch-deck.pptx", type: "pptx", updatedAt: "Jun 09, 2026", status: "attached" },
+    ],
+    categories: [
+      { id: "cat-launch-demo", name: "Demo Flow", weight: 25, criteria: ["Shows launch use case clearly", "Keeps narrative tight"] },
+      { id: "cat-launch-objections", name: "Objection Handling", weight: 20, criteria: ["Handles implementation risk", "Handles launch skepticism"] },
+      { id: "cat-launch-product", name: "Product Accuracy", weight: 20, criteria: ["Launch messaging is correct", "Feature boundaries are clear"] },
+      { id: "cat-launch-next", name: "Next-Step Clarity", weight: 20, criteria: ["Evaluation plan confirmed"] },
+      { id: "cat-launch-adherence", name: "Playbook Adherence", weight: 15, criteria: ["Matches approved launch talk track"] },
+    ],
+  },
+  {
+    id: "pb-renewal-expansion",
+    slug: "renewal-expansion",
+    name: "Renewal Expansion",
+    description: "Renewal scoring with churn-risk handling and expansion qualification.",
+    segment: "Existing customers",
+    callTypes: ["Renewal", "Expansion"],
+    methodology: "Custom",
+    status: "draft",
+    reps: 5,
+    calls: 12,
+    adherence: 69,
+    updated: "Jun 21, 2026",
+    sourceTypes: ["Prompt", "DOCX"],
+    sourceDocuments: [
+      { id: "src-009", name: "renewal-draft.docx", type: "docx", updatedAt: "Jun 21, 2026", status: "processing" },
+    ],
+    categories: [
+      { id: "cat-renewal-risk", name: "Risk Discovery", weight: 20, criteria: ["Health risks surfaced", "Renewal blockers identified"] },
+      { id: "cat-renewal-expansion", name: "Expansion Qualification", weight: 20, criteria: ["New team or use case identified"] },
+      { id: "cat-renewal-objections", name: "Objection Handling", weight: 20, criteria: ["Pricing and value renewal objections handled"] },
+      { id: "cat-renewal-next", name: "Next-Step Clarity", weight: 20, criteria: ["Renewal process and owner clarified"] },
+      { id: "cat-renewal-adherence", name: "Playbook Adherence", weight: 20, criteria: ["Matches expansion motion"] },
+    ],
+  },
+  {
+    id: "pb-old-outbound",
+    slug: "old-outbound",
+    name: "Old Outbound Playbook",
+    description: "Legacy outbound motion prior to the 2026 methodology shift.",
+    segment: "All",
+    callTypes: ["Cold Call", "Discovery"],
+    methodology: "BANT",
+    status: "archived",
+    reps: 0,
+    calls: 142,
+    adherence: 61,
+    updated: "Jan 12, 2026",
+    sourceTypes: ["PDF", "TXT"],
+    sourceDocuments: [
+      { id: "src-010", name: "old-script.pdf", type: "pdf", updatedAt: "Jan 10, 2026", status: "attached" },
+    ],
+    categories: [
+      { id: "cat-outbound-intro", name: "Intro & Hook", weight: 30, criteria: ["Used standard hook"] },
+      { id: "cat-outbound-bant", name: "BANT Qualification", weight: 50, criteria: ["Budget", "Authority", "Need", "Timeline"] },
+      { id: "cat-outbound-close", name: "Next Steps", weight: 20, criteria: ["Booked meeting"] },
+    ],
+  },
+]
+
+export const calls: CallRecord[] = [
+  {
+    id: "call-001",
+    rep: "Sarah Chen",
+    company: "Vanta",
+    playbook: "Enterprise Discovery",
+    playbookId: "pb-enterprise-discovery",
+    callType: "Discovery",
+    dealStageBefore: "Problem-aware",
+    dealStageAfter: null,
+    score: 91,
+    adherence: 84,
+    outcome: "Next step booked",
+    date: "Jun 21, 2026",
+    status: "Reviewed",
+    pipelineAmount: "$28,000",
+    lossReason: null,
+    talkListenRatio: "43 / 57",
+    scoreBreakdown: [
+      {
+        label: "Discovery",
+        score: 7,
+        outOf: 10,
+        note: "For a 50-person Series A startup buying its first sales tool, current-process pain and budget authority should have come earlier.",
+        evidence: [
+          {
+            title: "Discovery evidence",
+            quote: "Rep: Walk me through how your team handles this today and what breaks most often.",
+          },
+        ],
+      },
+      {
+        label: "Qualification",
+        score: 6,
+        outOf: 10,
+        note: "Asked about team size, but did not establish budget owner soon enough.",
+        evidence: [
+          {
+            title: "Missed qualification evidence",
+            quote: "Rep: We can circle back on budget later once you see the product.",
+          },
+        ],
+      },
+      {
+        label: "Objection Handling",
+        score: 9,
+        outOf: 10,
+        note: "Handled implementation-risk skepticism well.",
+      },
+      {
+        label: "Product Accuracy",
+        score: 9,
+        outOf: 10,
+        note: "Positioning stayed within approved product boundaries.",
+      },
+      {
+        label: "Next Steps",
+        score: 8,
+        outOf: 10,
+        note: "The next action was specific, but the finance stakeholder was not locked yet.",
+        evidence: [
+          {
+            title: "Next-step evidence",
+            quote: "Rep: I’ll send a recap, but we did not lock a specific review time with your finance lead.",
+          },
+        ],
+      },
+      {
+        label: "Playbook Adherence",
+        score: 8,
+        outOf: 10,
+        note: "Mostly aligned to the approved enterprise messaging.",
+      },
+    ],
+    missedQuestions: [
+      "Who owns budget approval if this moves forward this quarter?",
+      "What is breaking in the current process often enough to force change now?",
+      "Which stakeholder will care most about rollout risk or security review?",
+    ],
+    missedOpportunities: [
+      "The buyer mentioned a lean ops team, but the rep did not quantify time lost in the current workflow.",
+      "Recent Series A funding was not used to frame why the team may be formalizing tooling now.",
+    ],
+    productInaccuracies: [
+      "The rep implied native Salesforce bi-directional sync was live for this workflow when the approved talk track positions it as limited.",
+    ],
+    accountContext: {
+      company: {
+        name: "Vanta",
+        domain: "vanta.com",
+        employeeBand: "11-50",
+        stage: "series-a",
+        industry: "Security",
+        businessModel: "b2b-saas",
+        salesMotion: "sales-led",
+        pricingModel: "sales-assisted",
+        productSummary: "Security and compliance automation for growing SaaS teams.",
+        targetCustomer: "Scaling B2B software companies with lean operations teams.",
+        likelyUseCase: "Replacing spreadsheet-based compliance prep with a first dedicated workflow.",
+        relevantTechnologies: ["AWS", "Okta", "Salesforce"],
+        recentSignals: [
+          { type: "hiring", description: "Opened an enterprise AE role in London", date: "2026-06-10" },
+          { type: "product-launch", description: "Shipped a new compliance workflow last month", date: "2026-05-18" },
+          { type: "funding", description: "Raised Series A funding in March 2026", date: "2026-03-02" },
+        ],
+        buyingStageHypothesis: "vendor-evaluating",
+      },
+      contact: {
+        name: "Jordan Miles",
+        email: "jordan@vanta.com",
+        linkedinUrl: "https://linkedin.com/in/jordanmiles",
+        title: "Head of Revenue Operations",
+        department: "Revenue Operations",
+        seniority: "director",
+        likelyRoleInPurchase: "decision-maker",
+      },
+      confidence: {
+        company: 0.92,
+        contact: 0.84,
+        stage: 0.79,
+        salesMotion: 0.81,
+      },
+      sources: {
+        company: ["Exa company profile", "LinkedIn company page", "Recent web signals"],
+        contact: ["LinkedIn profile", "Contact email domain match"],
+        retrievedAt: "2026-06-21T14:20:00Z",
+      },
+    },
+    transcriptEvidence: [
+      {
+        title: "Discovery evidence",
+        quote: "Rep: Walk me through how your team handles this today and what breaks most often.",
+      },
+      {
+        title: "Missed qualification evidence",
+        quote: "Rep: We can circle back on budget later once you see the product.",
+      },
+      {
+        title: "Next-step evidence",
+        quote: "Rep: I’ll send a recap, but we did not lock a specific review time with your finance lead.",
+      },
+    ],
+    bestMoment: "The rep tied implementation risk back to the buyer’s small ops team and reframed speed-to-value clearly.",
+    topMissedMoment: "For a 50-person Series A startup buying its first sales tool, current process pain points and budget authority should have been surfaced earlier.",
+    buyerAwareFeedback: "Given this is a first-time sales tool purchase for a 50-person Series A team, the rep should have anchored harder on who currently owns the ad-hoc process being replaced and who actually signs off on new software spend at this size of company - both stayed implicit rather than confirmed.",
+    recommendedDrill: "Run a discovery drill focused on first-time buyers: current process, budget owner, evaluation path, and specific next step.",
+  },
+  {
+    id: "call-002",
+    rep: "Michael Torres",
+    company: "Linear",
+    playbook: "SMB Discovery",
+    playbookId: "pb-smb-discovery",
+    callType: "Discovery",
+    dealStageBefore: "Solution-aware",
+    dealStageAfter: null,
+    score: 84,
+    adherence: 78,
+    outcome: "Moved stage",
+    date: "Jun 21, 2026",
+    status: "Processing",
+    pipelineAmount: "$9,500",
+    lossReason: null,
+    talkListenRatio: null,
+    scoreBreakdown: [
+      { label: "Discovery", score: 8, outOf: 10, note: "Pain surfaced quickly." },
+      { label: "Qualification", score: 7, outOf: 10, note: "Budget fit partially explored." },
+      { label: "Product Accuracy", score: 9, outOf: 10, note: "Clean value articulation." },
+      { label: "Next Steps", score: 8, outOf: 10, note: "Follow-up review set." },
+      { label: "Playbook Adherence", score: 7, outOf: 10, note: "Could stay tighter to approved SMB messaging." },
+    ],
+    missedQuestions: [
+      "Who would approve the spend if the team likes the workflow?",
+      "Is this replacing an existing tool or a spreadsheet process?",
+    ],
+    missedOpportunities: [
+      "The buyer described cross-functional friction, but the rep did not map the downstream impact on delivery speed.",
+    ],
+    productInaccuracies: [],
+    accountContext: {
+      company: {
+        name: "Linear",
+        domain: "linear.app",
+        employeeBand: "51-200",
+        stage: "series-b-plus",
+        industry: "Developer tools",
+        businessModel: "developer-tools",
+        salesMotion: "hybrid",
+        pricingModel: "self-serve",
+        productSummary: "Issue tracking and product planning for software teams.",
+        targetCustomer: "High-performing product and engineering orgs.",
+        likelyUseCase: "Evaluating ops tooling for cross-functional execution visibility.",
+        relevantTechnologies: ["Slack", "GitHub"],
+        recentSignals: [{ type: "product-launch", description: "Expanded enterprise admin controls", date: "2026-06-05" }],
+        buyingStageHypothesis: "solution-aware",
+      },
+      contact: {
+        name: "Maya Chen",
+        email: "maya@linear.app",
+        linkedinUrl: "https://linkedin.com/in/mayachen",
+        title: "Operations Manager",
+        department: "Operations",
+        seniority: "manager",
+        likelyRoleInPurchase: "evaluator",
+      },
+      confidence: { company: 0.9, contact: 0.76, stage: 0.72, salesMotion: 0.8 },
+      sources: { company: ["Exa company profile"], contact: ["LinkedIn profile"], retrievedAt: "2026-06-21T11:10:00Z" },
+    },
+    transcriptEvidence: [],
+    bestMoment: "Asked about operational bottlenecks early.",
+    topMissedMoment: "Did not confirm who signs off on spend.",
+    buyerAwareFeedback: "Linear is a 51-200 person, series-B-plus self-serve developer-tools company - at that profile, an Operations Manager evaluator rarely controls budget alone, so the rep should have asked directly who approves tooling spend instead of letting it go unconfirmed.",
+    recommendedDrill: "Practice 10-minute SMB qualification sequences.",
+  },
+  {
+    id: "call-003",
+    rep: "Jessica Lee",
+    company: "Ramp",
+    playbook: "New Launch Demo",
+    playbookId: "pb-new-launch-demo",
+    callType: "Demo",
+    dealStageBefore: "Vendor evaluating",
+    dealStageAfter: null,
+    score: 88,
+    adherence: 81,
+    outcome: "Next step booked",
+    date: "Jun 20, 2026",
+    status: "Reviewed",
+    pipelineAmount: "$42,000",
+    lossReason: null,
+    talkListenRatio: "39 / 61",
+    scoreBreakdown: [
+      { label: "Demo Flow", score: 9, outOf: 10, note: "Narrative stayed crisp." },
+      { label: "Objection Handling", score: 8, outOf: 10, note: "Handled implementation concern reasonably well." },
+      { label: "Product Accuracy", score: 9, outOf: 10, note: "Launch messaging stayed consistent." },
+      { label: "Next Steps", score: 8, outOf: 10, note: "Evaluation review booked." },
+      { label: "Playbook Adherence", score: 7, outOf: 10, note: "Could reference the launch pain framing more often." },
+    ],
+    missedQuestions: [
+      "Who besides product ops will evaluate rollout risk?",
+    ],
+    missedOpportunities: [
+      "The buyer brought up internal change management and the rep did not anchor the demo to onboarding velocity.",
+    ],
+    productInaccuracies: [],
+    accountContext: {
+      company: {
+        name: "Ramp",
+        domain: "ramp.com",
+        employeeBand: "201-1000",
+        stage: "series-b-plus",
+        industry: "Fintech",
+        businessModel: "b2b-saas",
+        salesMotion: "sales-led",
+        pricingModel: "sales-assisted",
+        productSummary: "Finance automation and spend controls.",
+        targetCustomer: "Finance and operations teams at scaling companies.",
+        likelyUseCase: "Cross-functional workflow automation.",
+        relevantTechnologies: ["NetSuite", "Slack"],
+        recentSignals: [{ type: "expansion", description: "Expanded finance ops team", date: "2026-04-12" }],
+        buyingStageHypothesis: "vendor-evaluating",
+      },
+      contact: {
+        name: "Ari Patel",
+        email: "ari@ramp.com",
+        linkedinUrl: "https://linkedin.com/in/aripatel",
+        title: "Senior Product Operations Manager",
+        department: "Product Operations",
+        seniority: "manager",
+        likelyRoleInPurchase: "champion",
+      },
+      confidence: { company: 0.91, contact: 0.8, stage: 0.82, salesMotion: 0.85 },
+      sources: { company: ["Exa company profile"], contact: ["LinkedIn profile"], retrievedAt: "2026-06-20T09:15:00Z" },
+    },
+    transcriptEvidence: [],
+    bestMoment: "Mapped the launch to a concrete ops workflow quickly.",
+    topMissedMoment: "Did not confirm who would review implementation security.",
+    buyerAwareFeedback: "Ramp is a 201-1000 employee fintech company in vendor-evaluating mode - at that stage and in that industry, a security review is essentially guaranteed before signature, so the rep should have proactively named who owns that review instead of waiting for the buyer to raise it.",
+    recommendedDrill: "Practice launch-demo stakeholder mapping.",
+  },
+  {
+    id: "call-004",
+    rep: "David Park",
+    company: "Pilot",
+    playbook: "Renewal Expansion",
+    playbookId: "pb-renewal-expansion",
+    callType: "Expansion",
+    dealStageBefore: "Problem-aware",
+    dealStageAfter: null,
+    score: 73,
+    adherence: 69,
+    outcome: "No-show",
+    date: "Jun 20, 2026",
+    status: "Pending QA",
+    pipelineAmount: "$16,000",
+    lossReason: null,
+    talkListenRatio: null,
+    scoreBreakdown: [
+      { label: "Risk Discovery", score: 6, outOf: 10, note: "Did not surface churn risks early enough." },
+      { label: "Expansion Qualification", score: 7, outOf: 10, note: "A secondary use case emerged late." },
+      { label: "Objection Handling", score: 7, outOf: 10, note: "Handled price concerns passably." },
+      { label: "Next Steps", score: 5, outOf: 10, note: "No committed follow-up after the reschedule." },
+      { label: "Playbook Adherence", score: 7, outOf: 10, note: "Stayed close to the draft motion but not tightly." },
+    ],
+    missedQuestions: [
+      "What renewal blockers would keep this from closing on time?",
+      "Who needs to re-approve spend for the expansion scope?",
+    ],
+    missedOpportunities: [
+      "The rep heard a reschedule risk early but did not lock a fallback date before ending the conversation.",
+    ],
+    productInaccuracies: [],
+    accountContext: {
+      company: {
+        name: "Pilot",
+        domain: "pilot.com",
+        employeeBand: "51-200",
+        stage: "series-b-plus",
+        industry: "Fintech",
+        businessModel: "services",
+        salesMotion: "sales-led",
+        pricingModel: "sales-assisted",
+        productSummary: "Financial operations support for startups.",
+        targetCustomer: "Startup finance teams.",
+        likelyUseCase: "Expansion into a broader workflow footprint.",
+        relevantTechnologies: ["QuickBooks"],
+        recentSignals: [{ type: "leadership-change", description: "New VP of Customer Success joined", date: "2026-05-02" }],
+        buyingStageHypothesis: "problem-aware",
+      },
+      contact: {
+        name: "Leah West",
+        email: "leah@pilot.com",
+        linkedinUrl: "https://linkedin.com/in/leahwest",
+        title: "VP Finance",
+        department: "Finance",
+        seniority: "vp",
+        likelyRoleInPurchase: "economic-buyer",
+      },
+      confidence: { company: 0.86, contact: 0.83, stage: 0.77, salesMotion: 0.81 },
+      sources: { company: ["Exa company profile"], contact: ["LinkedIn profile"], retrievedAt: "2026-06-20T08:30:00Z" },
+    },
+    transcriptEvidence: [],
+    bestMoment: "Explored expansion potential beyond the original seat count.",
+    topMissedMoment: "Did not lock a recovery next step after the delayed meeting.",
+    buyerAwareFeedback: "Leah is the VP Finance and the economic buyer at a 51-200 person fintech-services company - with that level of authority on the call, the rep had a real opening to lock a concrete recovery date on the spot rather than letting the rescheduled meeting drift without a committed follow-up.",
+    recommendedDrill: "Practice renewal rescue conversations with explicit next actions.",
+  },
+]
+
+export const repAssignments: RepAssignment[] = [
+  {
+    id: "rep-001",
+    name: "Sarah Chen",
+    email: "sarah@playcall.ai",
+    role: "Sales Rep",
+    status: "Active",
+    avgScore: 92,
+    previousScore: 83,
+    callsAnalyzed: 45,
+    winRate: "31%",
+    playbooks: ["Enterprise Discovery", "New Launch Demo"],
+  },
+  {
+    id: "rep-002",
+    name: "Michael Torres",
+    email: "michael@playcall.ai",
+    role: "Sales Rep",
+    status: "Active",
+    avgScore: 85,
+    previousScore: 82,
+    callsAnalyzed: 38,
+    winRate: "24%",
+    playbooks: ["SMB Discovery"],
+  },
+  {
+    id: "rep-003",
+    name: "Jessica Lee",
+    email: "jessica@playcall.ai",
+    role: "Sales Rep",
+    status: "Active",
+    avgScore: 88,
+    previousScore: 82,
+    callsAnalyzed: 41,
+    winRate: "28%",
+    playbooks: ["Enterprise Discovery"],
+  },
+  {
+    id: "rep-004",
+    name: "David Park",
+    email: "david@playcall.ai",
+    role: "Sales Rep",
+    status: "Needs invite",
+    avgScore: 76,
+    previousScore: 72,
+    callsAnalyzed: 22,
+    winRate: "18%",
+    playbooks: ["Renewal Expansion"],
+  },
+  {
+    id: "rep-005",
+    name: "Emma Wilson",
+    email: "emma@playcall.ai",
+    role: "Manager",
+    status: "Active",
+    avgScore: 91,
+    previousScore: 89,
+    callsAnalyzed: 12,
+    winRate: "29%",
+    playbooks: ["Enterprise Discovery", "SMB Discovery", "New Launch Demo", "Renewal Expansion"],
+  },
+]
+
+export const pendingInvites: PendingInvite[] = [
+  {
+    id: "invite-001",
+    email: "david@playcall.ai",
+    role: "Sales Rep",
+    playbooks: ["Renewal Expansion"],
+    sentAt: "Jun 21, 2026",
+    status: "pending",
+  },
+  {
+    id: "invite-002",
+    email: "alyssa@playcall.ai",
+    role: "Manager",
+    playbooks: ["Enterprise Discovery", "SMB Discovery"],
+    sentAt: "Jun 18, 2026",
+    status: "expired",
+  },
+]

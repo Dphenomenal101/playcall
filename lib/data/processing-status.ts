@@ -1,0 +1,60 @@
+import { createAdminClient } from "@/lib/supabase/admin"
+import type { ProcessingStatus } from "@/lib/integrations/types"
+
+export async function syncPlaybookProcessingStatus(playbookId: string): Promise<ProcessingStatus> {
+  const admin = createAdminClient()
+  const { data: sourceRows, error } = await admin
+    .from("playbook_source_documents")
+    .select("processing_status")
+    .eq("playbook_id", playbookId)
+
+  if (error) throw error
+
+  let nextStatus: ProcessingStatus = "ready"
+  const statuses = (sourceRows ?? []).map((row) => row.processing_status as ProcessingStatus)
+
+  if (statuses.some((s) => s === "queued" || s === "processing")) {
+    nextStatus = "processing"
+  } else if (statuses.some((s) => s === "failed")) {
+    nextStatus = "failed"
+  }
+
+  const { error: updateError } = await admin
+    .from("playbooks")
+    .update({ processing_status: nextStatus })
+    .eq("id", playbookId)
+
+  if (updateError) throw updateError
+
+  return nextStatus
+}
+
+export async function syncCallProcessingStatus(callId: string): Promise<ProcessingStatus> {
+  const admin = createAdminClient()
+  const { data: artifactRows, error } = await admin
+    .from("call_artifacts")
+    .select("processing_status")
+    .eq("call_id", callId)
+
+  if (error) throw error
+
+  let nextStatus: ProcessingStatus = "ready"
+  const statuses = (artifactRows ?? []).map((row) => row.processing_status as ProcessingStatus)
+
+  if (statuses.length === 0) {
+    nextStatus = "queued"
+  } else if (statuses.some((s) => s === "queued" || s === "processing")) {
+    nextStatus = "processing"
+  } else if (statuses.some((s) => s === "failed")) {
+    nextStatus = "failed"
+  }
+
+  const { error: updateError } = await admin
+    .from("calls")
+    .update({ processing_status: nextStatus })
+    .eq("id", callId)
+
+  if (updateError) throw updateError
+
+  return nextStatus
+}

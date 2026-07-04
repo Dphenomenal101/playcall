@@ -142,13 +142,14 @@ function buildLlmSnapshot(
 }
 
 function buildEnrichmentSnapshot(
-  selections: { enrichmentProvider: string },
+  selections: { enrichmentProvider: string; documentParsingProvider: string },
   configs: ProviderConfig[]
 ) {
   return JSON.stringify({
     enrichment: selections.enrichmentProvider,
+    documentParsing: selections.documentParsingProvider,
     configs: configs
-      .filter((config) => config.role === "enrichment")
+      .filter((config) => config.role === "enrichment" || config.role === "document_parsing")
       .map((config) => ({
         providerId: config.providerId,
         defaultModel: config.defaultModel,

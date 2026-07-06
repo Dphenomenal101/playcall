@@ -163,8 +163,8 @@ function AuthPageInner() {
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-lime/50 to-transparent" />
           
           <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-surface/50 border border-border/40 flex items-center justify-center mb-4 shadow-inner">
-              <Sparkles className="w-6 h-6 text-lime" />
+            <div className="w-12 h-12 rounded-2xl bg-lime shadow-[0_0_20px_rgba(163,230,53,0.4)] flex items-center justify-center mb-4">
+              <span className="text-lime-950 font-mono text-xl font-bold">P</span>
             </div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Welcome to Playcall</h1>
             <p className="mt-2 text-sm text-muted-foreground">

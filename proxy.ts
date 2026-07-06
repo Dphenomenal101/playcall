@@ -36,10 +36,6 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    if (pathname === "/") {
-      return NextResponse.redirect(new URL("/auth", request.url))
-    }
-
     if (isPublicPath(pathname)) {
       return response
     }

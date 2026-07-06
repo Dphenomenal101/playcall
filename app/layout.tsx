@@ -11,8 +11,31 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Playcall | Playbook-Based Call Scoring",
-  description: "Playbook-based sales call scoring for GTM teams with BYOK model support.",
+  title: "Playcall | Open-source AI sales coaching OS for GTM teams",
+  description: "An open-source AI sales call coach that scores reps against your actual playbook. Upload your methodology and track real adherence.",
+  keywords: [
+    "Sales Coaching",
+    "AI Sales Coach",
+    "GTM Teams",
+    "Call Scoring",
+    "Open Source Sales",
+    "Playbook Adherence",
+    "Sales Enablement"
+  ],
+  authors: [{ name: "Phenomenal" }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://playcall.dphenomenal.com",
+    title: "Playcall | Open-source AI sales coaching OS",
+    description: "Score sales calls against your actual playbook using your own AI models. No generic advice, just actionable insights.",
+    siteName: "Playcall",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Playcall | AI Sales Coaching",
+    description: "An open-source AI sales call coach that scores reps against your actual playbook.",
+  },
   icons: {
     icon: [
       {

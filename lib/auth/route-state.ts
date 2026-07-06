@@ -2,6 +2,7 @@ import type { AppRole } from "@/lib/data/auth"
 
 export function isPublicPath(pathname: string) {
   return (
+    pathname === "/" ||
     pathname === "/auth" ||
     pathname === "/auth/verify" ||
     pathname.startsWith("/auth/callback") ||

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidateTag } from "next/cache"
 import { getLiveViewerContext } from "@/lib/data/live-workspace"
 import { getWorkspaceSettings, saveWorkspaceSettings } from "@/lib/data/live-settings"
 
@@ -34,6 +35,8 @@ export async function PATCH(request: Request) {
   }
 
   try {
+    // @ts-expect-error - Next.js types may be inconsistent here
+    revalidateTag(`workspace-${context.workspaceId}`)
     const data = await saveWorkspaceSettings({
       workspaceId: context.workspaceId,
       userId: context.viewer.id,

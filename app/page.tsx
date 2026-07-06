@@ -1,5 +1,497 @@
-import { redirect } from "next/navigation"
+"use client"
+
+import Link from "next/link"
+import { ArrowRight, Github, Zap, Lock, FileText, LayoutDashboard, Terminal, CheckCircle2, Trophy, BarChart2, Shield, XCircle } from "lucide-react"
+import { motion, useScroll, useTransform } from "framer-motion"
+import { useRef } from "react"
+
+import { 
+  SvgOpenAI, 
+  SvgAnthropic, 
+  SvgGoogleGemini, 
+  SvgPerplexity, 
+  SvgMistral, 
+  SvgCohere, 
+  SvgGroq, 
+  SvgTogetherAI 
+} from "@/components/logos"
+
+const GITHUB_URL = "https://github.com/Dphenomenal101/playcall"
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5, ease: [0.23, 1, 0.32, 1] }
+}
+
+const stagger = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
 
 export default function HomePage() {
-  redirect("/auth")
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"]
+  })
+  
+  // The inner content scrolls up by 75% of its height to reach the bottom.
+  const y = useTransform(scrollYProgress, [0.1, 0.9], ["5%", "-55%"])
+  
+  // The mockup expands slightly as you scroll into it
+  const scale = useTransform(scrollYProgress, [0.1, 0.3], [0.95, 1])
+
+  return (
+    <div className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-lime/30 overflow-x-hidden relative">
+      {/* Dynamic Background Gradients */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] opacity-20 dark:opacity-20 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-r from-lime/40 to-emerald-500/40 blur-[100px] rounded-full mix-blend-screen transform -translate-y-1/2" />
+      </div>
+
+      {/* Navigation */}
+      <motion.nav 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 border-b border-white/10 dark:border-white/5 bg-background/60 backdrop-blur-xl"
+      >
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="w-8 h-8 rounded-xl bg-lime shadow-[0_0_15px_rgba(163,230,53,0.4)] flex items-center justify-center transition-transform group-hover:scale-105">
+            <span className="text-lime-950 font-mono text-sm font-bold">P</span>
+          </div>
+          <span className="text-sm font-bold tracking-tight">Playcall</span>
+        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Github className="w-4 h-4" />
+            GitHub
+          </Link>
+          <Link
+            href="/auth"
+            className="flex items-center gap-2 text-sm font-semibold bg-foreground text-background px-4 py-2 rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg"
+          >
+            Sign In
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </motion.nav>
+
+      <main className="relative pt-28 lg:pt-36 pb-24 px-6 max-w-7xl mx-auto">
+        {/* Hero Section */}
+        <motion.section 
+          variants={stagger}
+          initial="initial"
+          animate="animate"
+          className="text-center max-w-4xl mx-auto mb-10"
+        >
+          <motion.h1 variants={fadeInUp} className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.05] mb-8">
+            Score sales calls against <br className="hidden sm:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-500 to-emerald-400 dark:from-lime-400 dark:to-emerald-300">
+              your actual{" "}
+            </span>
+            <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-lime-500 to-emerald-400 dark:from-lime-400 dark:to-emerald-300">
+              playbook
+              <svg className="absolute top-full mt-2 left-0 w-full overflow-visible" viewBox="0 0 160 32" fill="none" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="ul-grad" x1="0" y1="0" x2="160" y2="0" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#84cc16"/>
+                    <stop offset="1" stopColor="#34d399"/>
+                  </linearGradient>
+                </defs>
+                {/* Single continuous back-and-forth scribble */}
+                <path
+                  d="M2 5 C30 2, 80 7, 130 4, 158 3
+                     C145 8, 90 13, 40 11, 5 12
+                     C35 16, 85 20, 135 17, 155 18"
+                  stroke="url(#ul-grad)"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+              </svg>
+            </span>
+          </motion.h1>
+          
+          <motion.p variants={fadeInUp} className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
+            Generic call summaries are boring. Upload your playbook and let Playcall coach your reps to see if they actually said the right thing to the right buyer.
+          </motion.p>
+          
+          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/auth"
+              className="group relative flex items-center gap-2 bg-lime text-lime-950 font-bold px-8 py-4 rounded-full overflow-hidden transition-transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(163,230,53,0.3)] text-base"
+            >
+              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+              <span className="relative">Set up your workspace</span>
+              <ArrowRight className="relative w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link
+              href={GITHUB_URL}
+              target="_blank"
+              className="flex items-center gap-2 text-sm font-semibold text-foreground border border-border/60 bg-surface/30 backdrop-blur-md px-8 py-4 rounded-full hover:bg-surface/60 transition-all hover:scale-105 active:scale-95"
+            >
+              <Github className="w-4 h-4" />
+              View on GitHub
+            </Link>
+          </motion.div>
+          <motion.div variants={fadeInUp} className="mt-8 flex items-center justify-center gap-2 text-sm text-muted-foreground font-medium">
+            <span>Sales rep?</span>
+            <Link href="/auth" className="text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors">
+              Sign in here
+            </Link>
+          </motion.div>
+        </motion.section>
+
+        {/* Dashboard Preview / Glassmorphism UI */}
+        <section ref={containerRef} className="h-[120vh] relative mb-24">
+          <motion.div 
+            style={{ scale }}
+            className="sticky top-20 h-[85vh]"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-lime/5 to-transparent blur-3xl -z-10 rounded-[3rem]" />
+            <div className="relative h-full rounded-[2rem] border border-white/10 dark:border-white/5 bg-white/40 dark:bg-black/40 backdrop-blur-2xl overflow-hidden shadow-2xl p-2 sm:p-4">
+              <div className="rounded-[1.5rem] border border-border/40 bg-background h-full overflow-hidden relative flex flex-col">
+                {/* Fake UI Header */}
+                <div className="h-12 border-b border-border/40 bg-surface/30 flex items-center px-4 gap-2 z-20 shrink-0">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-rose-400/80" />
+                    <div className="w-3 h-3 rounded-full bg-amber-400/80" />
+                    <div className="w-3 h-3 rounded-full bg-lime-400/80" />
+                  </div>
+                  <div className="mx-auto px-4 py-1 rounded-md bg-surface border border-border/50 text-[10px] font-mono text-muted-foreground flex items-center gap-2 shadow-sm">
+                    <Lock className="w-3 h-3" />
+                    playcall.dphenomenal.com/manager
+                  </div>
+                </div>
+                {/* Fake UI Body (Scrollable via Framer Motion) */}
+                <div className="flex-1 overflow-hidden relative bg-surface/10">
+                  <motion.div style={{ y }} className="p-4 sm:p-8 flex flex-col gap-6">
+                    {/* Header */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-lime animate-pulse" />
+                      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Call Review</p>
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold tracking-tight">Vektor Labs Discovery Call</h3>
+                      <p className="text-sm text-muted-foreground mt-1">Enterprise Sales Playbook · Discovery · Today</p>
+                    </div>
+
+                    {/* Scoreboard */}
+                    <div className="rounded-3xl border border-border/40 bg-card/40 p-6 backdrop-blur-xl shadow-sm">
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+                        <div>
+                          <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground">Overall score</p>
+                          <div className="mt-2 flex items-end gap-2">
+                            <span className="text-5xl font-mono text-amber-500">58</span>
+                            <span className="pb-1 text-sm text-muted-foreground">/100</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <div className="rounded-2xl border border-border/40 bg-surface/30 p-4 min-w-[120px]">
+                            <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Playbook adherence</p>
+                            <p className="mt-1 text-2xl font-light tracking-tight text-amber-500">52%</p>
+                          </div>
+                          <div className="rounded-2xl border border-border/40 bg-surface/30 p-4 min-w-[140px]">
+                            <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Talk / listen</p>
+                            <div className="mt-1 flex items-baseline gap-2 text-sm">
+                              <span className="text-lg font-medium text-foreground/90">75%</span>
+                              <span className="text-[10px] text-muted-foreground">talk</span>
+                              <div className="h-3 w-px bg-border/60 mx-1" />
+                              <span className="text-lg font-medium text-foreground/90">25%</span>
+                              <span className="text-[10px] text-muted-foreground">listen</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Two Column Layout: Evidence vs Action */}
+                    <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr] items-start pb-20">
+                      
+                      {/* Left Column */}
+                      <div className="flex flex-col gap-6">
+                        {/* Buyer-aware summary mock */}
+                        <div className="rounded-3xl border border-border/40 bg-card/40 p-6 backdrop-blur-xl transition-all">
+                          <div className="mb-4 flex items-center gap-3">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-amber-500/20 bg-amber-500/10 text-amber-500">
+                              <Zap className="w-4 h-4" />
+                            </div>
+                            <h2 className="text-lg font-semibold tracking-tight">Buyer-aware summary</h2>
+                          </div>
+                          <p className="text-sm leading-relaxed text-muted-foreground">
+                            The rep successfully opened the call, but spent the majority of the time pitching product features rather than uncovering Vektor's Q3 timeline. They completely missed the security objection and failed to lock in a firm next step before the hour ran out.
+                          </p>
+                          
+                          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                            <div className="rounded-2xl border border-lime-500/20 bg-lime-500/5 p-5">
+                              <p className="text-[11px] font-semibold uppercase tracking-wider text-lime-500">Best moment</p>
+                              <p className="mt-3 text-sm leading-relaxed text-foreground/90">"I completely agree that scaling is your top priority right now..."</p>
+                            </div>
+                            <div className="rounded-2xl border border-border/30 bg-surface/30 p-5">
+                              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Top missed moment</p>
+                              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Talked over the prospect for 3 minutes during the core security objection.</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Category Breakdown Mock */}
+                        <div className="rounded-3xl border border-border/40 bg-card/40 p-6 backdrop-blur-xl transition-all">
+                          <h2 className="text-lg font-semibold tracking-tight mb-5">Category breakdown</h2>
+                          <div className="flex flex-col gap-5">
+                            {/* Mediocre category first */}
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium">Pain Discovery</span>
+                                <span className="text-sm font-mono font-bold text-amber-500">62/100</span>
+                              </div>
+                              <div className="h-2 w-full bg-surface rounded-full overflow-hidden">
+                                <div className="h-full bg-amber-500 w-[62%]" />
+                              </div>
+                              <div className="flex gap-3 items-start mt-3">
+                                <div className="px-2 py-0.5 rounded-md bg-background border border-border/40 font-mono text-[10px] text-muted-foreground mt-0.5 whitespace-nowrap shadow-sm">12:34</div>
+                                <p className="text-xs text-muted-foreground italic border-l-2 border-border/50 pl-3">"I completely agree that scaling the sales team is your top priority right now..."</p>
+                              </div>
+                            </div>
+                            {/* Bad category */}
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium">Securing Next Steps</span>
+                                <span className="text-sm font-mono font-bold text-rose-500">20/100</span>
+                              </div>
+                              <div className="h-2 w-full bg-surface rounded-full overflow-hidden">
+                                <div className="h-full bg-rose-500 w-[20%]" />
+                              </div>
+                              <div className="flex gap-3 items-start mt-3">
+                                <div className="px-2 py-0.5 rounded-md bg-background border border-border/40 font-mono text-[10px] text-muted-foreground mt-0.5 whitespace-nowrap shadow-sm">45:12</div>
+                                <p className="text-xs text-muted-foreground italic border-l-2 border-border/50 pl-3">"I'll just shoot you an email sometime next week and we can figure out a time to chat again."</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Column */}
+                      <div className="flex flex-col gap-6">
+                        {/* Deal progress mock */}
+                        <div className="rounded-3xl border border-border/40 bg-card/40 p-6 backdrop-blur-xl transition-all">
+                          <div className="mb-4 flex items-center gap-3">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full border border-blue-400/20 bg-blue-400/10 text-blue-400">
+                              <BarChart2 className="w-4 h-4" />
+                            </div>
+                            <h2 className="text-lg font-semibold tracking-tight">Deal progress</h2>
+                          </div>
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="rounded-2xl border border-border/20 bg-surface/20 p-4">
+                              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stage before</p>
+                              <p className="mt-2 text-sm font-medium text-foreground/90">Discovery</p>
+                            </div>
+                            <div className="rounded-2xl border border-border/20 bg-surface/20 p-4">
+                              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stage after</p>
+                              <p className="mt-2 text-sm font-medium text-foreground/90">No Decision</p>
+                            </div>
+                            <div className="rounded-2xl border border-border/20 bg-surface/20 p-4">
+                              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Outcome</p>
+                              <div className="mt-2 flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                <p className="text-sm font-medium text-foreground/90">Closed Lost</p>
+                              </div>
+                            </div>
+                            <div className="rounded-2xl border border-border/20 bg-surface/20 p-4">
+                              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Pipeline Amount</p>
+                              <p className="mt-2 text-sm font-medium text-foreground/90">$120,000</p>
+                            </div>
+                          </div>
+                          <div className="mt-4 rounded-2xl border border-border/30 bg-surface/30 p-5">
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Loss reason</p>
+                            <p className="mt-2 text-sm font-medium text-foreground/80 leading-relaxed">Rep pitched product features instead of uncovering Vektor's Q3 implementation timeline.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </section>
+
+        {/* Features Grid */}
+        <section className="mb-24">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Everything you need to scale</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Built for modern revenue teams that want total control over their data, models, and scoring methodology.</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: Lock, title: "Bring Your Own Key", desc: "Connect OpenAI, Anthropic, or any of 15+ LLMs per workspace. No vendor lock-in, no per-call markups. Workspace keys always take priority over app-level fallbacks." },
+              { icon: FileText, title: "Multi-modal Parsing", desc: "Audio recordings, transcripts, PDFs, DOCX, PPTX — all parsed to text before scoring. Visual layouts, tables, and slide decks included." },
+              { icon: Zap, title: "Async Edge Pipeline", desc: "Uploads return immediately. Transcription, document parsing, buyer enrichment, and scoring run as chained background jobs with a local fallback." },
+              { icon: LayoutDashboard, title: "Role-based access", desc: "Managers see team performance, control playbooks, and manage reps. Sales reps see only their own calls, scores, and feedback." },
+              { icon: CheckCircle2, title: "No Generic Advice", desc: "Calls are scored strictly against your playbook criteria — your methodology, your sales motion, not one-size-fits-all AI feedback." },
+              { icon: Shield, title: "Self-Hostable", desc: "Fully open source. Deploy to your own Vercel and Supabase instances. Call recordings and transcripts never leave your infrastructure." }
+            ].map((feature, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="group p-6 rounded-3xl border border-border/50 bg-surface/20 hover:bg-surface/40 transition-colors"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-lime-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <feature.icon className="w-6 h-6 text-lime-600 dark:text-lime-400" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Integrations Arc */}
+        <section className="mb-32 relative pt-32 pb-24 flex flex-col items-center justify-center overflow-hidden">
+          {/* Subtle glowing arc background */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] sm:w-[150%] h-[800px] rounded-[100%] border-t-[1px] border-white/10 bg-gradient-to-b from-lime-500/5 to-transparent" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[1px] bg-gradient-to-r from-transparent via-lime-500/30 to-transparent blur-sm" />
+
+          <div className="text-center relative z-20 mb-20">
+            <div className="inline-flex items-center justify-center px-4 py-1.5 mb-6 rounded-full border border-lime-500/20 bg-lime-500/10 text-lime-500 text-[10px] font-mono font-bold tracking-[0.2em] uppercase shadow-[0_0_15px_rgba(163,230,53,0.1)]">
+              Bring Your Own Key
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Plug & play with any model</h2>
+          </div>
+
+          <div className="relative z-20 w-full max-w-6xl mx-auto overflow-hidden" style={{ maskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)" }}>
+            <div className="flex flex-col gap-6">
+              {/* Marquee Row 1 */}
+              <motion.div 
+                className="flex w-[200%] gap-6"
+                animate={{ x: ["0%", "-50%"] }}
+                transition={{ duration: 30, ease: "linear", repeat: Infinity }}
+              >
+                {[...Array(2)].map((_, idx) => (
+                  <div key={idx} className="flex gap-6 w-1/2 justify-around">
+                    {[
+                      { name: "OpenAI", icon: SvgOpenAI, className: "font-sans font-bold" },
+                      { name: "Anthropic", icon: SvgAnthropic, className: "font-serif tracking-wider" },
+                      { name: "Google", icon: SvgGoogleGemini, className: "font-sans font-medium" },
+                      { name: "Mistral", icon: SvgMistral, className: "font-serif italic font-bold" },
+                    ].map((provider, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-3 px-8 py-4 rounded-full border border-white/5 bg-white/5 backdrop-blur-md shadow-xl text-muted-foreground/60 hover:text-foreground hover:bg-white/10 hover:border-white/10 transition-all cursor-default select-none group"
+                      >
+                        <provider.icon className="h-5 w-auto text-muted-foreground grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" />
+                        <span className={`text-lg tracking-tight ${provider.className}`}>{provider.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </motion.div>
+
+              {/* Marquee Row 2 */}
+              <motion.div 
+                className="flex w-[200%] gap-6"
+                animate={{ x: ["-50%", "0%"] }}
+                transition={{ duration: 35, ease: "linear", repeat: Infinity }}
+              >
+                {[...Array(2)].map((_, idx) => (
+                  <div key={idx} className="flex gap-6 w-1/2 justify-around">
+                    {[
+                      { name: "Groq", icon: SvgGroq, className: "font-mono font-bold lowercase tracking-tighter" },
+                      { name: "Cohere", icon: SvgCohere, className: "font-sans font-semibold lowercase" },
+                      { name: "Perplexity", icon: SvgPerplexity, className: "font-sans font-bold" },
+                      { name: "Together AI", icon: SvgTogetherAI, className: "font-sans font-medium" },
+                    ].map((provider, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-3 px-8 py-4 rounded-full border border-white/5 bg-white/5 backdrop-blur-md shadow-xl text-muted-foreground/60 hover:text-foreground hover:bg-white/10 hover:border-white/10 transition-all cursor-default select-none group"
+                      >
+                        <provider.icon className="h-5 w-auto text-muted-foreground grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" />
+                        <span className={`text-lg tracking-tight ${provider.className}`}>{provider.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* Deploy Section */}
+        <motion.section 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="relative rounded-[3rem] border border-border/50 bg-card overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-lime/10 via-transparent to-transparent opacity-50" />
+          <div className="relative p-8 md:p-16 flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1 text-center md:text-left">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Deploy in minutes</h2>
+              <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto md:mx-0">
+                Playcall is fully open source. Spin up your own instance on Vercel and Supabase for free.
+              </p>
+              <Link
+                href={`${GITHUB_URL}#readme`}
+                target="_blank"
+                className="inline-flex items-center gap-2 font-semibold text-lime-700 dark:text-lime-400 hover:text-lime-800 dark:hover:text-lime-300 transition-colors"
+              >
+                Read the deployment guide
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            
+            <div className="flex-1 w-full max-w-md">
+              <div className="rounded-2xl border border-border/50 bg-[#0d1117] shadow-2xl overflow-hidden">
+                <div className="h-10 border-b border-white/10 flex items-center px-4 gap-2 bg-white/5">
+                  <Terminal className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-xs font-mono text-muted-foreground">terminal</span>
+                </div>
+                <div className="p-6 font-mono text-sm space-y-3">
+                  <div className="text-gray-300"><span className="text-lime-400">git</span> clone {GITHUB_URL}</div>
+                  <div className="text-gray-300"><span className="text-lime-400">cd</span> playcall && pnpm install</div>
+                  <div className="text-gray-300"><span className="text-lime-400">cp</span> .env.example .env.local</div>
+                  <div className="text-gray-300"><span className="text-lime-400">pnpm</span> dev</div>
+                  <div className="text-emerald-400 pt-2 opacity-80">Ready on http://localhost:3000</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border/40 bg-surface/20">
+        <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-lime/20 flex items-center justify-center">
+              <span className="text-lime font-mono text-xs font-bold">P</span>
+            </div>
+            <span className="text-sm font-bold">Playcall</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Open source under the MIT License.
+          </p>
+          <div className="flex items-center gap-4">
+            <Link href={GITHUB_URL} className="text-muted-foreground hover:text-foreground transition-colors">
+              <Github className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
 }

@@ -74,6 +74,17 @@ pnpm install
 2. Pick a name, region, and database password (save the password somewhere)
 3. Wait for provisioning to finish (~2 minutes)
 
+### 2b. Configure email (SMTP)
+
+Playcall uses **email OTP** (6-digit one-time codes) for sign-in, but rep invite emails contain a **magic link** that redirects back to the app. Two things to configure in your Supabase dashboard:
+
+**Authentication → URL Configuration**
+- **Site URL**: your production domain (e.g. `https://yourdomain.com`)
+- **Redirect URLs**: add `https://yourdomain.com/auth` — invite magic links redirect here
+
+**Authentication → Email Settings → Enable Custom SMTP**
+Supabase's built-in sender is rate-limited to ~3 emails/hour on the free tier, which blocks sign-ins under real load. Any transactional provider works (Resend, Postmark, SendGrid, AWS SES). Resend has a generous free tier and takes under 5 minutes to set up.
+
 ### 3. Apply the database schema
 
 Install the [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) if you don't have it:
@@ -241,4 +252,4 @@ supabase/
 
 ## License
 
-No license file is currently included — all rights reserved by default. Add a `LICENSE` file if you intend to open-source this under a specific license (MIT, Apache-2.0, etc.).
+[MIT](LICENSE)

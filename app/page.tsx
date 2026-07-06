@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Github, Zap, Lock, FileText, LayoutDashboard, Terminal, CheckCircle2, Trophy, BarChart2, Shield, XCircle } from "lucide-react"
+import { ArrowRight, Github, Zap, Lock, FileText, LayoutDashboard, Terminal, CheckCircle2, Trophy, BarChart2, Shield, XCircle, Users, Target } from "lucide-react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
 
@@ -153,10 +153,10 @@ export default function HomePage() {
         </motion.section>
 
         {/* Dashboard Preview / Glassmorphism UI */}
-        <section ref={containerRef} className="h-[120vh] relative mb-24">
+        <section ref={containerRef} className="h-[100vh] relative mb-0">
           <motion.div 
             style={{ scale }}
-            className="sticky top-20 h-[85vh]"
+            className="sticky top-20 h-[85vh] select-none pointer-events-none"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-lime/5 to-transparent blur-3xl -z-10 rounded-[3rem]" />
             <div className="relative h-full rounded-[2rem] border border-white/10 dark:border-white/5 bg-white/40 dark:bg-black/40 backdrop-blur-2xl overflow-hidden shadow-2xl p-2 sm:p-4">
@@ -229,17 +229,19 @@ export default function HomePage() {
                             <h2 className="text-lg font-semibold tracking-tight">Buyer-aware summary</h2>
                           </div>
                           <p className="text-sm leading-relaxed text-muted-foreground">
-                            The rep successfully opened the call, but spent the majority of the time pitching product features rather than uncovering Vektor's Q3 timeline. They completely missed the security objection and failed to lock in a firm next step before the hour ran out.
+                            For a Series A company vendor-evaluating their first sales tool, current-process pain and budget authority should have surfaced earlier. Sarah is the decision-maker — the rep asked about team size but never confirmed her budget scope. That's the miss that killed the Q3 timeline.
                           </p>
                           
                           <div className="mt-6 grid gap-4 sm:grid-cols-2">
                             <div className="rounded-2xl border border-lime-500/20 bg-lime-500/5 p-5">
                               <p className="text-[11px] font-semibold uppercase tracking-wider text-lime-500">Best moment</p>
-                              <p className="mt-3 text-sm leading-relaxed text-foreground/90">"I completely agree that scaling is your top priority right now..."</p>
+                              <p className="mt-3 text-sm leading-relaxed text-foreground/90">Validated the prospect's primary challenge before pitching.</p>
+                              <p className="mt-2 text-xs text-lime-500/70 italic">"I completely agree that scaling is your top priority right now..."</p>
                             </div>
                             <div className="rounded-2xl border border-border/30 bg-surface/30 p-5">
                               <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Top missed moment</p>
-                              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Talked over the prospect for 3 minutes during the core security objection.</p>
+                              <p className="mt-3 text-sm leading-relaxed text-foreground/90">Talked over the prospect during the core security objection.</p>
+                              <p className="mt-2 text-xs text-muted-foreground/70 italic">"Let me stop you right there, our SOC2 actually covers..."</p>
                             </div>
                           </div>
                         </div>
@@ -282,37 +284,49 @@ export default function HomePage() {
 
                       {/* Right Column */}
                       <div className="flex flex-col gap-6">
+                        {/* Buyer Context Panel */}
+                        <div className="rounded-3xl border border-border/40 bg-card/40 p-6 backdrop-blur-xl transition-all">
+                          <div className="flex flex-col gap-3">
+                            <div>
+                              <p className="text-sm font-medium text-foreground/90">Vektor Labs · Series A · 40-60 employees</p>
+                              <p className="text-sm text-muted-foreground mt-1">Sarah Kim · VP Revenue · Decision-maker</p>
+                            </div>
+                          </div>
+                        </div>
+
                         {/* Deal progress mock */}
                         <div className="rounded-3xl border border-border/40 bg-card/40 p-6 backdrop-blur-xl transition-all">
-                          <div className="mb-4 flex items-center gap-3">
+                          <div className="mb-6 flex items-center gap-3">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-blue-400/20 bg-blue-400/10 text-blue-400">
                               <BarChart2 className="w-4 h-4" />
                             </div>
                             <h2 className="text-lg font-semibold tracking-tight">Deal progress</h2>
                           </div>
-                          <div className="grid gap-4 sm:grid-cols-2">
-                            <div className="rounded-2xl border border-border/20 bg-surface/20 p-4">
+                          
+                          <div className="grid gap-x-4 gap-y-6 sm:grid-cols-2 mb-6">
+                            <div>
                               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stage before</p>
                               <p className="mt-2 text-sm font-medium text-foreground/90">Discovery</p>
                             </div>
-                            <div className="rounded-2xl border border-border/20 bg-surface/20 p-4">
+                            <div>
                               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stage after</p>
-                              <p className="mt-2 text-sm font-medium text-foreground/90">No Decision</p>
+                              <p className="mt-2 text-sm font-medium text-foreground/90">Stalled</p>
                             </div>
-                            <div className="rounded-2xl border border-border/20 bg-surface/20 p-4">
+                            <div>
                               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Outcome</p>
                               <div className="mt-2 flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                                 <p className="text-sm font-medium text-foreground/90">Closed Lost</p>
                               </div>
                             </div>
-                            <div className="rounded-2xl border border-border/20 bg-surface/20 p-4">
+                            <div>
                               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Pipeline Amount</p>
                               <p className="mt-2 text-sm font-medium text-foreground/90">$120,000</p>
                             </div>
                           </div>
-                          <div className="mt-4 rounded-2xl border border-border/30 bg-surface/30 p-5">
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Loss reason</p>
+
+                          <div className="rounded-2xl border border-border/30 bg-surface/30 p-5">
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Loss reason</p>
                             <p className="mt-2 text-sm font-medium text-foreground/80 leading-relaxed">Rep pitched product features instead of uncovering Vektor's Q3 implementation timeline.</p>
                           </div>
                         </div>
@@ -325,7 +339,109 @@ export default function HomePage() {
           </motion.div>
         </section>
 
-        {/* Features Grid */}
+        {/* Outcomes Bridge Section */}
+        <section className="mb-40 relative z-10 -mt-12">
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                title: "See who's actually running the playbook",
+                body: "Rep-level adherence at a glance. Not vibes, not gut feel, evidence per call.",
+                visual: (
+                  <div className="w-full h-48 rounded-3xl bg-gradient-to-br from-surface/50 to-surface/10 border border-border/50 mb-6 flex flex-col justify-center p-6 relative overflow-hidden shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] select-none pointer-events-none">
+                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-lime-500/10 rounded-full blur-3xl" />
+                    
+                    <div className="flex items-center justify-between relative z-10 mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg border border-white/10 bg-gradient-to-b from-white/10 to-transparent flex items-center justify-center text-[10px] font-bold text-white shadow-sm">AS</div>
+                        <span className="text-sm font-medium text-white/80">Alex S.</span>
+                      </div>
+                      <span className="text-sm font-mono text-lime-400 drop-shadow-[0_0_8px_rgba(163,230,53,0.5)]">92%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-black/50 rounded-full overflow-hidden relative z-10 mb-6 border border-white/5">
+                      <div className="h-full bg-gradient-to-r from-lime-600 to-lime-400 w-[92%] rounded-full shadow-[0_0_10px_rgba(163,230,53,0.5)]" />
+                    </div>
+
+                    <div className="flex items-center justify-between relative z-10 mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg border border-white/5 bg-gradient-to-b from-white/5 to-transparent flex items-center justify-center text-[10px] font-bold text-white/50">MJ</div>
+                        <span className="text-sm font-medium text-white/50">Maria J.</span>
+                      </div>
+                      <span className="text-sm font-mono text-white/50">64%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-black/50 rounded-full overflow-hidden relative z-10 border border-white/5">
+                      <div className="h-full bg-gradient-to-r from-white/20 to-white/40 w-[64%] rounded-full" />
+                    </div>
+                  </div>
+                )
+              },
+              {
+                title: "Know why deals stall before they close",
+                body: "Loss reasons grounded in what was said, not what the CRM guessed after the fact.",
+                visual: (
+                  <div className="w-full h-48 rounded-3xl bg-gradient-to-br from-surface/50 to-surface/10 border border-border/50 mb-6 flex flex-col justify-center p-6 relative overflow-hidden shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] select-none pointer-events-none">
+                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl" />
+                    
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-2.5 mb-4">
+                        <div className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Loss Reason</span>
+                      </div>
+                      <div className="p-4 rounded-xl border border-white/10 bg-black/40 backdrop-blur-md shadow-2xl">
+                        <p className="text-xs text-white/70 leading-relaxed italic border-l-2 border-rose-500/50 pl-3">
+                          "Prospect required SOC2 Type II compliance immediately. Rep failed to mention it is slated for Q4."
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              },
+              {
+                title: "Spot objection patterns before they compound",
+                body: "Find the security question killing your Q3 before it kills your Q4.",
+                visual: (
+                  <div className="w-full h-48 rounded-3xl bg-gradient-to-br from-surface/50 to-surface/10 border border-border/50 mb-6 flex flex-col justify-end p-6 relative overflow-hidden shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] select-none pointer-events-none">
+                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-rose-500/10 rounded-full blur-3xl" />
+                    
+                    <div className="relative z-10 w-full h-28 flex items-end justify-between gap-2 border-b border-white/10 pb-4">
+                      {[30, 45, 25, 85, 40, 60, 20].map((h, i) => (
+                        <div key={i} className="w-full bg-white/5 rounded-t-sm relative transition-all group-hover:bg-white/10" style={{ height: `${h}%` }}>
+                          {h === 85 && (
+                            <>
+                              <div className="absolute inset-0 bg-gradient-to-t from-rose-500/40 to-rose-400/80 rounded-t-sm shadow-[0_0_15px_rgba(244,63,94,0.4)]" />
+                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-rose-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg whitespace-nowrap">
+                                14 calls
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="group flex flex-col h-full p-2"
+              >
+                {item.visual}
+                <div className="flex flex-col gap-2 flex-1 px-2">
+                  <h3 className="text-base font-bold text-white/90 tracking-tight">{item.title}</h3>
+                  <p className="text-sm text-white/50 leading-relaxed">{item.body}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Technical Features Grid */}
         <section className="mb-24">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Everything you need to scale</h2>
@@ -334,7 +450,7 @@ export default function HomePage() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { icon: Lock, title: "Bring Your Own Key", desc: "Connect OpenAI, Anthropic, or any of 15+ LLMs per workspace. No vendor lock-in, no per-call markups. Workspace keys always take priority over app-level fallbacks." },
+              { icon: Lock, title: "Bring Your Own Key", desc: "Connect OpenAI, Anthropic, or any of 15+ LLMs per workspace. No vendor lock-in, no per-call markups. One team can run GPT-4o, another on Claude. No code changes required." },
               { icon: FileText, title: "Multi-modal Parsing", desc: "Audio recordings, transcripts, PDFs, DOCX, PPTX — all parsed to text before scoring. Visual layouts, tables, and slide decks included." },
               { icon: Zap, title: "Async Edge Pipeline", desc: "Uploads return immediately. Transcription, document parsing, buyer enrichment, and scoring run as chained background jobs with a local fallback." },
               { icon: LayoutDashboard, title: "Role-based access", desc: "Managers see team performance, control playbooks, and manage reps. Sales reps see only their own calls, scores, and feedback." },
@@ -376,16 +492,16 @@ export default function HomePage() {
             <div className="flex flex-col gap-6">
               {/* Marquee Row 1 */}
               <motion.div 
-                className="flex w-[200%] gap-6"
+                className="flex w-max gap-6 pr-6"
                 animate={{ x: ["0%", "-50%"] }}
                 transition={{ duration: 30, ease: "linear", repeat: Infinity }}
               >
                 {[...Array(2)].map((_, idx) => (
-                  <div key={idx} className="flex gap-6 w-1/2 justify-around">
+                  <div key={idx} className="flex shrink-0 gap-6">
                     {[
                       { name: "OpenAI", icon: SvgOpenAI, className: "font-sans font-bold" },
                       { name: "Anthropic", icon: SvgAnthropic, className: "font-serif tracking-wider" },
-                      { name: "Google", icon: SvgGoogleGemini, className: "font-sans font-medium" },
+                      { name: "Gemini", icon: SvgGoogleGemini, className: "font-sans font-medium" },
                       { name: "Mistral", icon: SvgMistral, className: "font-serif italic font-bold" },
                     ].map((provider, i) => (
                       <div
@@ -402,12 +518,12 @@ export default function HomePage() {
 
               {/* Marquee Row 2 */}
               <motion.div 
-                className="flex w-[200%] gap-6"
+                className="flex w-max gap-6 pr-6"
                 animate={{ x: ["-50%", "0%"] }}
                 transition={{ duration: 35, ease: "linear", repeat: Infinity }}
               >
                 {[...Array(2)].map((_, idx) => (
-                  <div key={idx} className="flex gap-6 w-1/2 justify-around">
+                  <div key={idx} className="flex shrink-0 gap-6">
                     {[
                       { name: "Groq", icon: SvgGroq, className: "font-mono font-bold lowercase tracking-tighter" },
                       { name: "Cohere", icon: SvgCohere, className: "font-sans font-semibold lowercase" },

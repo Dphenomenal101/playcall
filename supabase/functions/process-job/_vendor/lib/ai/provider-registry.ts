@@ -23,6 +23,7 @@ export interface ProviderRegistryEntry {
   models?: string[]
   credentialFields: ProviderCredentialField[]
   runtimeSupported?: boolean
+  apiKeyUrl?: string
 }
 
 const llmProviders: ProviderRegistryEntry[] = [
@@ -245,6 +246,17 @@ const enrichmentProviders: ProviderRegistryEntry[] = [
     roles: ["enrichment"],
     capabilityFlags: ["company_enrichment", "contact_enrichment", "account_context"],
     credentialFields: [{ key: "apiKey", label: "Exa API key", kind: "secret", required: true }],
+  },
+  {
+    id: "thehog",
+    label: "TheHog",
+    roles: ["enrichment"],
+    capabilityFlags: ["company_enrichment", "contact_enrichment", "account_context"],
+    credentialFields: [
+      { key: "accessKey", label: "TheHog Access Key", kind: "secret", required: true, placeholder: "ak_xxxxxxxxxxxxxxxx" },
+      { key: "secretKey", label: "TheHog Secret Key", kind: "secret", required: true, placeholder: "sk_xxxxxxxxxxxxxxxx" },
+    ],
+    apiKeyUrl: "https://platform.thehog.ai/credentials",
   },
 ]
 

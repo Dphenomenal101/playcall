@@ -6,7 +6,7 @@ import { createProcessingJob, updateProcessingJobStatus, type ProcessingJobType 
 import { dispatchProcessingJob } from "./dispatch"
 import { scheduleRubricGenerationForPlaybook } from "./rubric"
 import { enrichAccountContext } from "../enrichment/service"
-import { generateStructuredObject } from "../ai/providers"
+import { generateStructuredObject, getWorkspaceProviderRuntimeConfig } from "../ai/providers"
 
 const rubricSchema = z.object({
   summary: z.string(),
@@ -599,7 +599,7 @@ async function processBuyerEnrichmentJob(job: any) {
     workspace_id: call.workspace_id,
     call_id: call.id,
     processing_job_id: job.id,
-    provider: "exa",
+    provider: enrichment.providerId,
     status: "completed",
     request_identity: {
       linkedin_url: call.contact_linkedin_url,
@@ -677,12 +677,13 @@ export async function maybeQueueNextCallJobs(callId: string) {
 
   if (!existingEnrichment && (call.contact_linkedin_url || call.contact_email)) {
     await admin.from("calls").update({ processing_status: "processing" }).eq("id", call.id)
+    const enrichmentConfig = await getWorkspaceProviderRuntimeConfig(call.workspace_id, "enrichment")
     const enrichmentJob = await createProcessingJob(admin as any, {
       workspaceId: call.workspace_id,
       entityType: "call",
       entityId: call.id,
       jobType: "buyer_enrichment",
-      provider: "exa",
+      provider: enrichmentConfig?.providerId ?? "exa",
     })
     await dispatchProcessingJob(enrichmentJob.id)
     return

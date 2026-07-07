@@ -78,11 +78,34 @@ async function validateLlamaParse(apiKey: string): Promise<ProviderKeyValidation
   }
 }
 
+async function validateTheHog(accessKey: string, secretKey: string): Promise<ProviderKeyValidation> {
+  if (!secretKey.trim()) {
+    return { valid: false, message: "Secret key is required" }
+  }
+  try {
+    // POST a minimal company search — returns 202 on valid auth, 401 on bad creds.
+    const response = await fetch("https://developer.thehog.ai/api/v1/companies/search", {
+      method: "POST",
+      headers: { "X-Access-Key": accessKey, "X-Secret-Key": secretKey, "Content-Type": "application/json" },
+      body: JSON.stringify({ query: "test", limit: 1 }),
+    })
+    if (response.status === 401 || response.status === 403) return { valid: false, message: "Invalid credentials" }
+    return { valid: true }
+  } catch {
+    return { valid: false, message: "Unable to reach TheHog" }
+  }
+}
+
 export async function validateProviderApiKey(
   providerId: string,
   apiKey: string,
-  extra?: { baseUrl?: string }
+  extra?: { baseUrl?: string; secretKey?: string }
 ): Promise<ProviderKeyValidation> {
+  if (providerId === "thehog") {
+    if (!apiKey.trim()) return { valid: false, message: "Access key is required" }
+    return validateTheHog(apiKey, extra?.secretKey ?? "")
+  }
+
   if (!apiKey.trim()) {
     return { valid: false, message: "API key is required" }
   }

@@ -16,6 +16,7 @@ export async function DELETE() {
     ["enrichment_runs", admin.from("enrichment_runs").delete().eq("workspace_id", workspaceId)],
     ["playbook_generation_runs", admin.from("playbook_generation_runs").delete().eq("workspace_id", workspaceId)],
     ["processing_jobs", admin.from("processing_jobs").delete().eq("workspace_id", workspaceId)],
+    ["workspace_provider_credentials", admin.from("workspace_provider_credentials").delete().eq("workspace_id", workspaceId)],
     ["workspace_provider_settings", admin.from("workspace_provider_settings").delete().eq("workspace_id", workspaceId)],
     ["coaching_comments", admin.from("coaching_comments").delete().eq("workspace_id", workspaceId)],
     ["call_score_dimensions", admin.from("call_score_dimensions").delete().eq("workspace_id", workspaceId)],

@@ -310,6 +310,11 @@ function SettingsPageInner({ initialSettings, isDemoMode }: { initialSettings: S
 
       if (!existing) {
         const option = providerOptions[role].find((entry) => entry.id === providerId)
+        const allFields = (option?.credentialFields ?? []).map((f) => ({
+          ...f,
+          value: f.key === fieldKey ? value : "",
+          configured: f.key === fieldKey ? Boolean(value.trim()) : false,
+        }))
         return [
           ...current,
           {
@@ -318,7 +323,7 @@ function SettingsPageInner({ initialSettings, isDemoMode }: { initialSettings: S
             enabled: true,
             defaultModel: option?.defaultModel ?? "",
             metadata: {},
-            fields: [{ key: fieldKey, label: fieldKey, kind: "text", value, configured: Boolean(value.trim()) }],
+            fields: allFields.length > 0 ? allFields : [{ key: fieldKey, label: fieldKey, kind: "text", value, configured: Boolean(value.trim()) }],
           },
         ]
       }
@@ -346,10 +351,12 @@ function SettingsPageInner({ initialSettings, isDemoMode }: { initialSettings: S
 
   const validateChangedApiKeys = async (roles: ProviderConfig["role"][]) => {
     const configsToCheck = selectedConfigByRole.filter((config) => roles.includes(config.role))
-    const checks: Array<{ fieldId: string; providerId: string; fieldKey: string; apiKey: string; webhookSecret?: string; baseUrl?: string }> = []
+    const checks: Array<{ fieldId: string; providerId: string; fieldKey: string; apiKey: string; secretKey?: string; webhookSecret?: string; baseUrl?: string }> = []
 
     for (const config of configsToCheck) {
       const apiKeyField = config.fields.find((field) => field.key === "apiKey")
+      const accessKeyField = config.fields.find((field) => field.key === "accessKey")
+      const secretKeyField = config.fields.find((field) => field.key === "secretKey")
       const baseUrlField = config.fields.find((field) => field.key === "baseUrl")
 
       // An empty value means the user didn't retype the field - the
@@ -361,6 +368,15 @@ function SettingsPageInner({ initialSettings, isDemoMode }: { initialSettings: S
           providerId: config.providerId,
           fieldKey: "apiKey",
           apiKey: apiKeyField.value,
+          baseUrl: baseUrlField?.value,
+        })
+      } else if (accessKeyField && accessKeyField.value.trim() && secretKeyField?.value?.trim()) {
+        checks.push({
+          fieldId: `${config.role}-${config.providerId}-accessKey`,
+          providerId: config.providerId,
+          fieldKey: "accessKey",
+          apiKey: accessKeyField.value,
+          secretKey: secretKeyField.value,
           baseUrl: baseUrlField?.value,
         })
       }
@@ -400,6 +416,7 @@ function SettingsPageInner({ initialSettings, isDemoMode }: { initialSettings: S
               providerId: check.providerId,
               fieldKey: check.fieldKey,
               apiKey: check.apiKey,
+              secretKey: check.secretKey,
               webhookSecret: check.webhookSecret,
               baseUrl: check.baseUrl,
             }),
@@ -619,6 +636,7 @@ function SettingsPageInner({ initialSettings, isDemoMode }: { initialSettings: S
               <div className="relative">
                 <Input
                   type={isSecret && !isRevealed ? "password" : "text"}
+                  autoComplete={isSecret ? "new-password" : "off"}
                   value={field.value}
                   placeholder={field.placeholder}
                   onChange={(event) =>
@@ -638,7 +656,7 @@ function SettingsPageInner({ initialSettings, isDemoMode }: { initialSettings: S
                 ) : null}
               </div>
               <div className="mt-1 flex items-center justify-between gap-2">
-                {(field.key === "apiKey" || field.key === "webhookSigningSecret") && keyValidation[fieldId] ? (
+                {(field.key === "apiKey" || field.key === "accessKey" || field.key === "webhookSigningSecret") && keyValidation[fieldId] ? (
                   <p
                     className={cn(
                       "text-[11px] font-medium",
@@ -666,7 +684,7 @@ function SettingsPageInner({ initialSettings, isDemoMode }: { initialSettings: S
                           : "Optional"}
                   </p>
                 )}
-                {field.key === "apiKey" && registryEntry?.apiKeyUrl && (
+                {(field.key === "apiKey" || field.key === "accessKey") && registryEntry?.apiKeyUrl && (
                   <a
                     href={registryEntry.apiKeyUrl}
                     target="_blank"

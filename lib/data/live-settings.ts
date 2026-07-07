@@ -93,12 +93,16 @@ function buildProviderConfigRow(input: {
 
 export async function getWorkspaceSettings(workspaceId: string, viewer: { id: string; email: string | null }) {
   const admin = createAdminClient()
-  const [{ data: workspace, error: workspaceError }, { data: providerRows, error: providerError }, { data: profile }] =
+  const [{ data: workspace, error: workspaceError }, { data: providerRows, error: providerError }, { data: credentialRows }, { data: profile }] =
     await Promise.all([
       admin.from("workspaces").select("name, company_domain").eq("id", workspaceId).maybeSingle(),
       admin
         .from("workspace_provider_settings")
-        .select("provider_type, role, encrypted_credentials, selected_default_model, enabled, metadata")
+        .select("provider_type, role, selected_default_model, enabled, metadata")
+        .eq("workspace_id", workspaceId),
+      admin
+        .from("workspace_provider_credentials")
+        .select("provider_id, encrypted_credentials")
         .eq("workspace_id", workspaceId),
       admin.from("profiles").select("full_name").eq("id", viewer.id).maybeSingle(),
     ])
@@ -113,6 +117,12 @@ export async function getWorkspaceSettings(workspaceId: string, viewer: { id: st
 
   const rows = providerRows ?? []
   const rowByRole = new Map(rows.map((row) => [row.role as WorkspaceProviderRole, row]))
+  const credsByProvider = new Map(
+    (credentialRows ?? []).map((row) => [
+      row.provider_id,
+      decryptWorkspaceSecret((row.encrypted_credentials as Record<string, unknown> | null) ?? {}),
+    ])
+  )
 
   const rawPrimaryProvider = rowByRole.get("primary_llm")?.provider_type ?? "openai"
   const rawFallbackProvider = rowByRole.get("fallback_llm")?.provider_type ?? "anthropic"
@@ -129,7 +139,7 @@ export async function getWorkspaceSettings(workspaceId: string, viewer: { id: st
         enabled: Boolean(row.enabled),
         defaultModel: row.selected_default_model ?? "",
         metadata: (row.metadata as Record<string, unknown> | null) ?? {},
-        credentials: decryptWorkspaceSecret((row.encrypted_credentials as Record<string, unknown> | null) ?? {}),
+        credentials: credsByProvider.get(row.provider_type) ?? {},
       })
     )
     .filter((row): row is NonNullable<typeof row> => Boolean(row))
@@ -188,22 +198,18 @@ export async function saveWorkspaceSettings(input: {
     }
   }
 
-  const { data: existingRows, error: existingRowsError } = await admin
-    .from("workspace_provider_settings")
-    .select("role, provider_type, encrypted_credentials")
+  const { data: existingCredRows, error: existingCredRowsError } = await admin
+    .from("workspace_provider_credentials")
+    .select("provider_id, encrypted_credentials")
     .eq("workspace_id", input.workspaceId)
 
-  if (existingRowsError) {
-    throw existingRowsError
+  if (existingCredRowsError) {
+    throw existingCredRowsError
   }
 
-  // Keyed by role+providerId, not just role - otherwise switching a role's
-  // provider (e.g. Primary LLM from OpenAI to Anthropic) without retyping a
-  // key would merge the OLD provider's secret into the NEW provider's row
-  // under whatever field key they happen to share (both use "apiKey").
-  const existingSecretsByRoleAndProvider = new Map(
-    (existingRows ?? []).map((row) => [
-      `${row.role}:${row.provider_type}`,
+  const existingSecretsByProvider = new Map(
+    (existingCredRows ?? []).map((row) => [
+      row.provider_id,
       decryptWorkspaceSecret((row.encrypted_credentials as Record<string, unknown> | null) ?? {}),
     ])
   )
@@ -231,12 +237,15 @@ export async function saveWorkspaceSettings(input: {
     }
   }
 
-  const providerRows = input.providerConfigs.map((config) => {
+  const settingsRows: Array<Record<string, unknown>> = []
+  const credentialRows: Array<Record<string, unknown>> = []
+
+  for (const config of input.providerConfigs) {
     if (!isProviderRuntimeSupported(config.providerId)) {
       throw new Error(`Provider ${config.providerId} is not enabled in the current runtime`)
     }
 
-    const existingSecrets = existingSecretsByRoleAndProvider.get(`${config.role}:${config.providerId}`) ?? {}
+    const existingSecrets = existingSecretsByProvider.get(config.providerId) ?? {}
     // Only persist keys the provider's registry entry actually declares
     // (e.g. "apiKey") - without this allowlist, a request crafted outside
     // the settings UI could stash an arbitrary extra key like "baseUrl" for
@@ -250,39 +259,42 @@ export async function saveWorkspaceSettings(input: {
       ...Object.fromEntries(Object.entries(existingSecrets).filter(([key]) => allowedKeys.has(key))),
       ...Object.fromEntries(
         Object.entries(config.credentials ?? {}).filter(([key, value]) => {
-          if (!allowedKeys.has(key)) {
-            return false
-          }
-
-          if (typeof value !== "string") {
-            return value !== null && typeof value !== "undefined"
-          }
-
+          if (!allowedKeys.has(key)) return false
+          if (typeof value !== "string") return value !== null && typeof value !== "undefined"
           return value.trim().length > 0
         })
       ),
     }
 
-    return {
+    settingsRows.push({
       workspace_id: input.workspaceId,
       provider_type: config.providerId,
       role: config.role,
       enabled: config.enabled,
       selected_default_model: config.defaultModel.trim() || null,
-      encrypted_credentials: encryptWorkspaceSecret(mergedCredentials),
       metadata: config.metadata ?? {},
       created_by: input.userId,
-    }
-  })
-
-  if (providerRows.length > 0) {
-    const { error: providerError } = await admin.from("workspace_provider_settings").upsert(providerRows, {
-      onConflict: "workspace_id,role",
     })
 
-    if (providerError) {
-      throw providerError
-    }
+    credentialRows.push({
+      workspace_id: input.workspaceId,
+      provider_id: config.providerId,
+      encrypted_credentials: encryptWorkspaceSecret(mergedCredentials),
+    })
+  }
+
+  if (settingsRows.length > 0) {
+    const { error: providerError } = await admin.from("workspace_provider_settings").upsert(settingsRows, {
+      onConflict: "workspace_id,role",
+    })
+    if (providerError) throw providerError
+  }
+
+  if (credentialRows.length > 0) {
+    const { error: credError } = await admin.from("workspace_provider_credentials").upsert(credentialRows, {
+      onConflict: "workspace_id,provider_id",
+    })
+    if (credError) throw credError
   }
 
   return getWorkspaceSettings(input.workspaceId, { id: input.userId, email: null })

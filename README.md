@@ -54,7 +54,9 @@ only used server-side for writes that legitimately cross RLS boundaries.
 - A [Vercel](https://vercel.com) account (free tier is fine)
 - An OpenAI and/or Anthropic API key (for LLM scoring; OpenAI also needed for audio transcription)
 - A [LlamaParse](https://cloud.llamaindex.ai) API key (free tier: 10k credits/month, resets monthly)
-- (Optional) An [Exa](https://exa.ai) API key for buyer enrichment
+- An enrichment provider API key for buyer context lookup — pick one:
+  - [Exa](https://exa.ai) (single key, `EXA_API_KEY`)
+  - [TheHog](https://docs.thehog.ai) (access key + secret key, `THEHOG_ACCESS_KEY` + `THEHOG_SECRET_KEY`)
 
 ---
 
@@ -134,8 +136,12 @@ supabase secrets set WORKSPACE_SECRETS_ENCRYPTION_KEY=your_key
 supabase secrets set OPENAI_API_KEY=your_key
 supabase secrets set ANTHROPIC_API_KEY=your_key   # optional fallback
 
-# Optional — for buyer enrichment. Same BYOK caveat applies.
+# Optional — for buyer enrichment (pick one; same BYOK caveat applies).
+# Option A: Exa
 supabase secrets set EXA_API_KEY=your_key
+# Option B: TheHog (both required together)
+supabase secrets set THEHOG_ACCESS_KEY=your_ak_key
+supabase secrets set THEHOG_SECRET_KEY=your_sk_key
 ```
 
 > **Heads up:** skipping `WORKSPACE_SECRETS_ENCRYPTION_KEY` means the Edge Function cannot decrypt BYOK credentials and falls back to env-level keys. Skipping both means the Edge Function cannot call any LLM — it returns a 400 and Playcall falls back to running scoring in-process on Next.js instead. Everything still works, but you lose async edge execution.
@@ -178,7 +184,9 @@ LlamaParse handles all rich document parsing (PDFs, DOCX, PPTX, visual layouts, 
 
 - **OpenAI** (required for scoring + audio transcription): [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 - **Anthropic** (optional fallback): [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys)
-- **Exa** (optional, for buyer enrichment): [dashboard.exa.ai/api-keys](https://dashboard.exa.ai/api-keys)
+- **Buyer enrichment — pick one:**
+  - **Exa**: [dashboard.exa.ai/api-keys](https://dashboard.exa.ai/api-keys) — single API key, neural web search
+  - **TheHog**: [platform.thehog.ai/credentials](https://platform.thehog.ai/credentials) — access key + secret key, structured company search + contact enrichment
 
 These are app-level fallback keys. Managers can also configure their own keys per workspace via **Settings → Integrations** (BYOK) — workspace keys always take priority.
 

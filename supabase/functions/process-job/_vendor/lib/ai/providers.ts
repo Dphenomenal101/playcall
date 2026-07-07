@@ -111,6 +111,19 @@ function getEnvRuntimeConfig(role: WorkspaceProviderRole): ProviderRuntimeConfig
     }
   }
 
+  const theHogAccessKey = readRuntimeEnv("THEHOG_ACCESS_KEY")?.trim()
+  const theHogSecretKey = readRuntimeEnv("THEHOG_SECRET_KEY")?.trim()
+  if (role === "enrichment" && theHogAccessKey && theHogSecretKey) {
+    return {
+      providerId: "thehog",
+      model: "",
+      credentials: { accessKey: theHogAccessKey, secretKey: theHogSecretKey },
+      metadata: {},
+      enabled: true,
+      source: "env",
+    }
+  }
+
   const llamaCloudApiKey = readRuntimeEnv("LLAMA_CLOUD_API_KEY")?.trim()
   if (role === "document_parsing" && llamaCloudApiKey) {
     return {
@@ -133,7 +146,7 @@ export async function getWorkspaceProviderRuntimeConfig(
   const admin = createAdminClient()
   const { data, error } = await admin
     .from("workspace_provider_settings")
-    .select("provider_type, encrypted_credentials, selected_default_model, enabled, metadata")
+    .select("provider_type, selected_default_model, enabled, metadata")
     .eq("workspace_id", workspaceId)
     .eq("role", role)
     .maybeSingle()
@@ -160,10 +173,17 @@ export async function getWorkspaceProviderRuntimeConfig(
     return envConfig
   }
 
+  const { data: credData } = await admin
+    .from("workspace_provider_credentials")
+    .select("encrypted_credentials")
+    .eq("workspace_id", workspaceId)
+    .eq("provider_id", data.provider_type)
+    .maybeSingle()
+
   const config = {
     providerId: data.provider_type,
     model: data.selected_default_model ?? getProviderRegistryEntry(data.provider_type)?.defaultModel ?? "",
-    credentials: decryptWorkspaceSecret((data.encrypted_credentials as Record<string, unknown> | null) ?? {}),
+    credentials: decryptWorkspaceSecret((credData?.encrypted_credentials as Record<string, unknown> | null) ?? {}),
     metadata: (data.metadata as Record<string, unknown> | null) ?? {},
     enabled: Boolean(data.enabled),
     source: "workspace" as const,

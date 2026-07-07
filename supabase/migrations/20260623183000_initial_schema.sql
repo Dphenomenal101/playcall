@@ -262,6 +262,16 @@ create table public.workspace_provider_settings (
   unique (workspace_id, role)
 );
 
+create table public.workspace_provider_credentials (
+  id uuid primary key default gen_random_uuid(),
+  workspace_id uuid not null references public.workspaces(id) on delete cascade,
+  provider_id text not null,
+  encrypted_credentials jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now()),
+  unique (workspace_id, provider_id)
+);
+
 create table public.playbook_generation_runs (
   id uuid primary key default gen_random_uuid(),
   workspace_id uuid not null references public.workspaces(id) on delete cascade,
@@ -499,6 +509,10 @@ create trigger set_workspace_provider_settings_updated_at
 before update on public.workspace_provider_settings
 for each row execute function public.set_updated_at();
 
+create trigger set_workspace_provider_credentials_updated_at
+before update on public.workspace_provider_credentials
+for each row execute function public.set_updated_at();
+
 create trigger set_playbook_generation_runs_updated_at
 before update on public.playbook_generation_runs
 for each row execute function public.set_updated_at();
@@ -531,6 +545,7 @@ alter table public.call_score_dimensions enable row level security;
 alter table public.coaching_comments enable row level security;
 alter table public.processing_jobs enable row level security;
 alter table public.workspace_provider_settings enable row level security;
+alter table public.workspace_provider_credentials enable row level security;
 alter table public.playbook_generation_runs enable row level security;
 alter table public.enrichment_runs enable row level security;
 
@@ -743,6 +758,17 @@ using (private.is_workspace_manager(workspace_id));
 
 create policy "workspace managers can manage provider settings"
 on public.workspace_provider_settings
+for all
+using (private.is_workspace_manager(workspace_id))
+with check (private.is_workspace_manager(workspace_id));
+
+create policy "workspace managers can view provider credentials"
+on public.workspace_provider_credentials
+for select
+using (private.is_workspace_manager(workspace_id));
+
+create policy "workspace managers can manage provider credentials"
+on public.workspace_provider_credentials
 for all
 using (private.is_workspace_manager(workspace_id))
 with check (private.is_workspace_manager(workspace_id));

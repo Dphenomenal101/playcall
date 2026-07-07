@@ -182,6 +182,7 @@ function CredentialField({
       <div className="relative">
         <Input
           type={isSecret && !isRevealed ? "password" : "text"}
+          autoComplete={isSecret ? "new-password" : "off"}
           value={field.value}
           placeholder={field.placeholder}
           onChange={(event) => onChange(event.target.value)}
@@ -458,8 +459,8 @@ export default function ManagerOnboardingPage() {
   ) => {
     setKeysStepError(null)
 
-    if (fieldKey === "apiKey") {
-      const fieldId = `${role}-${providerId}-apiKey`
+    if (fieldKey === "apiKey" || fieldKey === "accessKey") {
+      const fieldId = `${role}-${providerId}-${fieldKey}`
       setKeyValidation((current) => {
         if (!(fieldId in current)) {
           return current
@@ -536,10 +537,12 @@ export default function ManagerOnboardingPage() {
   }
 
   const validateApiKeys = async (configs: ProviderConfig[]) => {
-    const checks: Array<{ fieldId: string; providerId: string; fieldKey: string; apiKey: string; webhookSecret?: string; baseUrl?: string }> = []
+    const checks: Array<{ fieldId: string; providerId: string; fieldKey: string; apiKey: string; secretKey?: string; webhookSecret?: string; baseUrl?: string }> = []
 
     for (const config of configs) {
       const apiKeyField = config.fields.find((field) => field.key === "apiKey")
+      const accessKeyField = config.fields.find((field) => field.key === "accessKey")
+      const secretKeyField = config.fields.find((field) => field.key === "secretKey")
       const baseUrlField = config.fields.find((field) => field.key === "baseUrl")
 
       if (apiKeyField && apiKeyField.value.trim()) {
@@ -548,6 +551,15 @@ export default function ManagerOnboardingPage() {
           providerId: config.providerId,
           fieldKey: "apiKey",
           apiKey: apiKeyField.value,
+          baseUrl: baseUrlField?.value,
+        })
+      } else if (accessKeyField && accessKeyField.value.trim() && secretKeyField?.value?.trim()) {
+        checks.push({
+          fieldId: `${config.role}-${config.providerId}-accessKey`,
+          providerId: config.providerId,
+          fieldKey: "accessKey",
+          apiKey: accessKeyField.value,
+          secretKey: secretKeyField.value,
           baseUrl: baseUrlField?.value,
         })
       }
@@ -587,6 +599,7 @@ export default function ManagerOnboardingPage() {
               providerId: check.providerId,
               fieldKey: check.fieldKey,
               apiKey: check.apiKey,
+              secretKey: check.secretKey,
               webhookSecret: check.webhookSecret,
               baseUrl: check.baseUrl,
             }),
@@ -1084,7 +1097,7 @@ export default function ManagerOnboardingPage() {
                                 <CredentialField
                                   field={field}
                                   fieldId={fieldId}
-                                  validation={field.key === "apiKey" || field.key === "webhookSigningSecret" ? keyValidation[fieldId] : undefined}
+                                  validation={field.key === "apiKey" || field.key === "accessKey" || field.key === "webhookSigningSecret" ? keyValidation[fieldId] : undefined}
                                   isRevealed={revealedFields.has(fieldId)}
                                   onToggleReveal={() => toggleFieldReveal(fieldId)}
                                   onChange={(value) =>
@@ -1178,7 +1191,7 @@ export default function ManagerOnboardingPage() {
                                 <CredentialField
                                   field={field}
                                   fieldId={fieldId}
-                                  validation={field.key === "apiKey" || field.key === "webhookSigningSecret" ? keyValidation[fieldId] : undefined}
+                                  validation={field.key === "apiKey" || field.key === "accessKey" || field.key === "webhookSigningSecret" ? keyValidation[fieldId] : undefined}
                                   isRevealed={revealedFields.has(fieldId)}
                                   onToggleReveal={() => toggleFieldReveal(fieldId)}
                                   onChange={(value) =>
@@ -1231,7 +1244,7 @@ export default function ManagerOnboardingPage() {
                                 <CredentialField
                                   field={field}
                                   fieldId={fieldId}
-                                  validation={field.key === "apiKey" || field.key === "webhookSigningSecret" ? keyValidation[fieldId] : undefined}
+                                  validation={field.key === "apiKey" || field.key === "accessKey" || field.key === "webhookSigningSecret" ? keyValidation[fieldId] : undefined}
                                   isRevealed={revealedFields.has(fieldId)}
                                   onToggleReveal={() => toggleFieldReveal(fieldId)}
                                   onChange={(value) =>
@@ -1289,7 +1302,7 @@ export default function ManagerOnboardingPage() {
                                 <CredentialField
                                   field={field}
                                   fieldId={fieldId}
-                                  validation={field.key === "apiKey" ? keyValidation[fieldId] : undefined}
+                                  validation={field.key === "apiKey" || field.key === "accessKey" ? keyValidation[fieldId] : undefined}
                                   isRevealed={revealedFields.has(fieldId)}
                                   onToggleReveal={() => toggleFieldReveal(fieldId)}
                                   onChange={(value) =>

@@ -459,6 +459,43 @@ function CallDetailPageInner({ initialCall, isDemoMode }: { initialCall: CallRec
               {/* Right Column: Action & History (Sticky) */}
               <div className="sticky top-6 flex flex-col gap-6">
 
+                {/* Buyer context used */}
+                <div className="rounded-3xl border border-border/40 bg-card/40 p-8 backdrop-blur-xl transition-all hover:bg-card/50">
+                  <div>
+                    <h2 className="text-lg font-semibold tracking-tight">Buyer context used</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      The context that dynamically shaped this scorecard.
+                    </p>
+                  </div>
+                  <div className="mt-5 grid gap-3">
+                    <div className="rounded-xl border border-border/30 bg-surface/30 p-4">
+                      <p className="font-medium text-foreground/90">{call.accountContext.company.name}</p>
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                        <span className="rounded-md bg-background/50 px-2 py-1 border border-border/50">{call.accountContext.company.domain}</span>
+                        <span className="rounded-md bg-background/50 px-2 py-1 border border-border/50">{call.accountContext.company.stage}</span>
+                        <span className="rounded-md bg-background/50 px-2 py-1 border border-border/50">{call.accountContext.company.employeeBand}</span>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                        <span className="rounded-md bg-background/50 px-2 py-1 border border-border/50">{call.accountContext.company.salesMotion}</span>
+                        <span className="rounded-md bg-background/50 px-2 py-1 border border-border/50">{call.accountContext.company.pricingModel}</span>
+                        <span className="rounded-md bg-background/50 px-2 py-1 border border-border/50">{call.accountContext.company.buyingStageHypothesis}</span>
+                      </div>
+                    </div>
+                    <div className="rounded-xl border border-border/30 bg-surface/30 p-4">
+                      <p className="font-medium text-foreground/90">{call.accountContext.contact.name}</p>
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                        <span className="rounded-md bg-background/50 px-2 py-1 border border-border/50">{call.accountContext.contact.title}</span>
+                        <span className="rounded-md bg-background/50 px-2 py-1 border border-border/50">{call.accountContext.contact.likelyRoleInPurchase}</span>
+                      </div>
+                      <p className="mt-3 flex items-center gap-3 text-[10px] uppercase tracking-wider text-muted-foreground/80">
+                        <span>Company conf: <span className="font-medium text-foreground/70">{Math.round(call.accountContext.confidence.company * 100)}%</span></span>
+                        <span className="h-1 w-1 rounded-full bg-border" />
+                        <span>Contact conf: <span className="font-medium text-foreground/70">{Math.round(call.accountContext.confidence.contact * 100)}%</span></span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Coaching Note Form */}
                 <div className="relative overflow-hidden rounded-3xl border border-lime/30 bg-card/80 p-8 shadow-[0_8px_30px_rgba(163,230,53,0.12)] backdrop-blur-xl">
                   <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-lime/10 blur-3xl pointer-events-none" />

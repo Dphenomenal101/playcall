@@ -266,6 +266,17 @@ const enrichmentProviders: ProviderRegistryEntry[] = [
     credentialFields: [{ key: "apiKey", label: "Exa API key", kind: "secret", required: true }],
     apiKeyUrl: "https://dashboard.exa.ai/api-keys",
   },
+  {
+    id: "thehog",
+    label: "TheHog",
+    roles: ["enrichment"],
+    capabilityFlags: ["company_enrichment", "contact_enrichment", "account_context"],
+    credentialFields: [
+      { key: "accessKey", label: "TheHog Access Key", kind: "secret", required: true, placeholder: "ak_xxxxxxxxxxxxxxxx" },
+      { key: "secretKey", label: "TheHog Secret Key", kind: "secret", required: true, placeholder: "sk_xxxxxxxxxxxxxxxx" },
+    ],
+    apiKeyUrl: "https://platform.thehog.ai/credentials",
+  },
 ]
 
 const documentParsingProviders: ProviderRegistryEntry[] = [

@@ -12,7 +12,7 @@ import type { CallRecord } from "@/lib/playcall-data"
 
 const processingSteps = [
   "Uploading call file",
-  "Transcribing or parsing transcript",
+  "Reviewing the transcript",
   "Enriching company and primary contact",
   "Generating scorecard and coaching feedback",
 ]

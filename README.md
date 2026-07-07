@@ -2,7 +2,7 @@
 
 Score sales calls against your actual playbook, not generic AI advice.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Dphenomenal101/playcall&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,WORKSPACE_SECRETS_ENCRYPTION_KEY,CRON_SECRET,LLAMA_CLOUD_API_KEY,LLAMA_CLOUD_WEBHOOK_SECRET,LLAMA_CLOUD_WEBHOOK_URL,OPENAI_API_KEY&envDescription=See%20.env.example%20for%20full%20descriptions.%20BLOB_READ_WRITE_TOKEN%20is%20injected%20automatically%20once%20you%20connect%20a%20Vercel%20Blob%20store.&envLink=https://github.com/Dphenomenal101/playcall/blob/main/.env.example)
+[Stack](#stack) · [Prerequisites](#prerequisites) · [Setup](#setup) · [Running locally](#7-run-locally) · [Deploy](#deploying-to-production)
 
 ![Playcall app screenshot](docs/screenshots/playcall-screenshot.png)
 
@@ -98,6 +98,10 @@ vercel env pull .env.local
 - `LLAMA_CLOUD_WEBHOOK_SECRET` — generate with `openssl rand -hex 32`
 - `LLAMA_CLOUD_WEBHOOK_URL` — set to `https://yourdomain.com/api/webhooks/llamaparse` (or your ngrok URL for local dev)
 
+**App URL**:
+
+- `NEXT_PUBLIC_APP_URL` — your app's public base URL. Set to `http://localhost:3000` for local dev, and your deployed domain (e.g. `https://yourdomain.com`) in production. Used for invite links and the LlamaParse webhook URL.
+
 **Other secrets** — generate locally:
 
 ```bash
@@ -115,9 +119,12 @@ Open [localhost:3000](http://localhost:3000) and complete the manager onboarding
 
 ## Deploying to production
 
-1. Import your repo into Vercel at [vercel.com/new](https://vercel.com/new)
-2. **Project Settings → Environment Variables** — add everything from `.env.local` (skip `BLOB_READ_WRITE_TOKEN`; Vercel sets that automatically)
-3. Push to your default branch — Vercel deploys automatically and activates the daily keep-alive cron that prevents free-tier Supabase projects from pausing
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Dphenomenal101/playcall&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,NEXT_PUBLIC_APP_URL,WORKSPACE_SECRETS_ENCRYPTION_KEY,CRON_SECRET,LLAMA_CLOUD_API_KEY,LLAMA_CLOUD_WEBHOOK_SECRET,LLAMA_CLOUD_WEBHOOK_URL,OPENAI_API_KEY&envDescription=See%20.env.example%20for%20full%20descriptions.%20BLOB_READ_WRITE_TOKEN%20is%20injected%20automatically%20once%20you%20connect%20a%20Vercel%20Blob%20store.&envLink=https://github.com/Dphenomenal101/playcall/blob/main/.env.example)
+
+1. Click the button above (or import your repo at [vercel.com/new](https://vercel.com/new))
+2. **Storage → Create → Blob** → connect to your project (`BLOB_READ_WRITE_TOKEN` is injected automatically)
+3. **Project Settings → Environment Variables** — add everything from `.env.local`, but set `NEXT_PUBLIC_APP_URL` to your deployed domain (not `http://localhost:3000`)
+4. Push to your default branch — Vercel deploys automatically and activates the daily keep-alive cron that prevents free-tier Supabase projects from pausing
 
 ## Project structure
 

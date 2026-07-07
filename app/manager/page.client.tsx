@@ -399,6 +399,43 @@ function ManagerDashboardInner({ initialData }: { initialData: ManagerWorkspaceD
               </div>
             </div>
           </div>
+
+          {wonPatterns.length > 0 || lostPatterns.length > 0 ? (
+            <div className="flex flex-col gap-4 md:gap-6">
+              {wonPatterns.length > 0 && (
+                <div className="rounded-3xl bg-card/40 backdrop-blur-xl border border-border/40 p-6 shadow-sm">
+                  <h2 className="text-lg font-semibold text-foreground/90">Won Call Patterns</h2>
+                  <div className="mt-4 space-y-3">
+                    {wonPatterns.map((item) => (
+                      <div key={item.label} className="rounded-2xl border border-border/40 bg-surface/20 p-4">
+                        <div className="flex items-center justify-between gap-4">
+                          <p className="text-sm font-semibold text-foreground/90">{item.label}</p>
+                          <span className="text-xs font-mono text-lime bg-lime/10 px-2 py-1 rounded-md border border-lime/20">{item.score}</span>
+                        </div>
+                        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{item.detail}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {lostPatterns.length > 0 && (
+                <div className="rounded-3xl bg-card/40 backdrop-blur-xl border border-border/40 p-6 shadow-sm">
+                  <h2 className="text-lg font-semibold text-foreground/90">Lost Call Patterns</h2>
+                  <div className="mt-4 space-y-3">
+                    {lostPatterns.map((item, index) => (
+                      <div key={`${item.label}-${index}`} className="rounded-2xl border border-border/40 bg-surface/20 p-4">
+                        <div className="flex items-center justify-between gap-4">
+                          <p className="text-sm font-semibold text-foreground/90">{item.label}</p>
+                          <span className="text-xs font-mono text-destructive bg-destructive/10 px-2 py-1 rounded-md border border-destructive/20">{item.score}</span>
+                        </div>
+                        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{item.detail}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : null}
         </div>
 
         {/* Right Column (Spans 1) */}
@@ -506,7 +543,7 @@ function ManagerDashboardInner({ initialData }: { initialData: ManagerWorkspaceD
                 <Trophy className="w-4 h-4 text-lime" /> Top Performers
               </h2>
             </div>
-            <div className="space-y-3 flex-1">
+            <div className="space-y-3">
               {topPerformers.length > 0 ? (
                 topPerformers
                   .map((rep, i) => (
@@ -545,43 +582,6 @@ function ManagerDashboardInner({ initialData }: { initialData: ManagerWorkspaceD
           </div>
         </div>
       </div>
-
-      {wonPatterns.length > 0 || lostPatterns.length > 0 ? (
-        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="rounded-3xl bg-card/40 backdrop-blur-xl border border-border/40 p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-foreground/90">Won Call Patterns</h2>
-            <div className="mt-4 space-y-3">
-              {wonPatterns.length > 0 ? wonPatterns.map((item) => (
-                <div key={item.label} className="rounded-2xl border border-border/40 bg-surface/20 p-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-sm font-semibold text-foreground/90">{item.label}</p>
-                    <span className="text-xs font-mono text-lime bg-lime/10 px-2 py-1 rounded-md border border-lime/20">{item.score}</span>
-                  </div>
-                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{item.detail}</p>
-                </div>
-              )) : (
-                <p className="text-xs text-muted-foreground">No won-call patterns yet.</p>
-              )}
-            </div>
-          </div>
-          <div className="rounded-3xl bg-card/40 backdrop-blur-xl border border-border/40 p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-foreground/90">Lost Call Patterns</h2>
-            <div className="mt-4 space-y-3">
-              {lostPatterns.length > 0 ? lostPatterns.map((item, index) => (
-                <div key={`${item.label}-${index}`} className="rounded-2xl border border-border/40 bg-surface/20 p-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-sm font-semibold text-foreground/90">{item.label}</p>
-                    <span className="text-xs font-mono text-destructive bg-destructive/10 px-2 py-1 rounded-md border border-destructive/20">{item.score}</span>
-                  </div>
-                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{item.detail}</p>
-                </div>
-              )) : (
-                <p className="text-xs text-muted-foreground">No closed-lost patterns yet.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : null}
     </div>
   )
 }

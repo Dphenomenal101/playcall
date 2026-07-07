@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidateTag } from "next/cache"
 import { createAdminClient } from "@/lib/supabase/admin"
 import {
   verifyLlamaParseWebhookSignature,
@@ -148,6 +149,9 @@ export async function POST(request: Request) {
       .eq("id", sourceDocumentId)
     console.log("[llamaparse-webhook] source doc updated to ready", { sourceDocumentId, updateErr })
 
+    // @ts-expect-error - Next.js types may be inconsistent here
+    revalidateTag(`workspace-${sourceDoc.workspace_id}`)
+
     try {
       await maybeScheduleRubricIfAllSourcesReady(sourceDoc.workspace_id, sourceDoc.playbook_id)
       console.log("[llamaparse-webhook] rubric scheduled for playbook", sourceDoc.playbook_id)
@@ -160,6 +164,8 @@ export async function POST(request: Request) {
       .from("playbook_source_documents")
       .update({ processing_status: "failed", processing_error: result.error })
       .eq("id", sourceDocumentId)
+    // @ts-expect-error - Next.js types may be inconsistent here
+    revalidateTag(`workspace-${sourceDoc.workspace_id}`)
     await syncPlaybookProcessingStatus(sourceDoc.playbook_id).catch(() => null)
   } else {
     // Still pending after all retries — mark failed so user isn't stuck forever
@@ -168,6 +174,8 @@ export async function POST(request: Request) {
       .from("playbook_source_documents")
       .update({ processing_status: "failed", processing_error: "LlamaParse result not ready after retries. Please re-upload." })
       .eq("id", sourceDocumentId)
+    // @ts-expect-error - Next.js types may be inconsistent here
+    revalidateTag(`workspace-${sourceDoc.workspace_id}`)
     await syncPlaybookProcessingStatus(sourceDoc.playbook_id).catch(() => null)
   }
 

@@ -53,6 +53,7 @@ Deno.serve(async (req: Request) => {
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to process job"
+    console.error("[process-job] unhandled error:", error)
     return new Response(JSON.stringify({ error: message }), {
       status: 400,
       headers: { "Content-Type": "application/json" },

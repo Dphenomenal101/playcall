@@ -122,15 +122,23 @@ supabase functions deploy process-job
 
 The function reads `SUPABASE_SERVICE_ROLE_KEY`, which Supabase auto-injects into every Edge Function's environment — no manual config needed there.
 
-After deploying, set the secrets the Edge Function needs for scoring and enrichment. These are **separate** from your `.env.local` — Edge Functions run in Deno and don't read your local or Vercel environment:
+After deploying, set the secrets the Edge Function needs. These are **separate** from your `.env.local` and Vercel environment — Edge Functions run in Deno and have their own isolated secret store:
 
 ```bash
+# Required — used to decrypt workspace BYOK credentials stored in the database.
+# Must match WORKSPACE_SECRETS_ENCRYPTION_KEY in your .env.local / Vercel config.
+supabase secrets set WORKSPACE_SECRETS_ENCRYPTION_KEY=your_key
+
+# Required if you are not using BYOK per workspace (app-level fallback keys).
+# If every workspace has its own OpenAI key set in Settings, you can skip these.
 supabase secrets set OPENAI_API_KEY=your_key
-supabase secrets set ANTHROPIC_API_KEY=your_key   # optional
-supabase secrets set EXA_API_KEY=your_key         # optional, for buyer enrichment
+supabase secrets set ANTHROPIC_API_KEY=your_key   # optional fallback
+
+# Optional — for buyer enrichment. Same BYOK caveat applies.
+supabase secrets set EXA_API_KEY=your_key
 ```
 
-> **Heads up:** skipping this step means the Edge Function will silently fall back to in-process execution for scoring, and buyer enrichment will fail with "Missing Exa API key" even if the key is set in `.env.local`.
+> **Heads up:** skipping `WORKSPACE_SECRETS_ENCRYPTION_KEY` means the Edge Function cannot decrypt BYOK credentials and falls back to env-level keys. Skipping both means the Edge Function cannot call any LLM — it returns a 400 and Playcall falls back to running scoring in-process on Next.js instead. Everything still works, but you lose async edge execution.
 
 ### 6. Set up Vercel Blob
 

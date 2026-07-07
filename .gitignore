@@ -40,3 +40,6 @@ next-env.d.ts
 
 # personal scratch notes
 TODO.md
+
+# supabase CLI local state
+supabase/.temp/

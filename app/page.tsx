@@ -123,7 +123,7 @@ export default function HomePage() {
           </motion.h1>
           
           <motion.p variants={fadeInUp} className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-            Generic call summaries are boring. Upload your playbook and let Playcall coach your reps to see if they actually said the right thing to the right buyer.
+          Generic call summaries bury the data that helps deals close. Upload your playbook and let Playcall grade whether your reps said the right thing to the right buyer.
           </motion.p>
           
           <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -158,8 +158,8 @@ export default function HomePage() {
             style={{ scale }}
             className="sticky top-20 h-[85vh] select-none pointer-events-none"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-lime/5 to-transparent blur-3xl -z-10 rounded-[3rem]" />
-            <div className="relative h-full rounded-[2rem] border border-white/10 dark:border-white/5 bg-white/40 dark:bg-black/40 backdrop-blur-2xl overflow-hidden shadow-2xl p-2 sm:p-4">
+            <div className="absolute inset-0 bg-gradient-to-b from-lime/20 via-lime/5 to-transparent blur-[80px] -z-10 rounded-[3rem]" />
+            <div className="relative h-full rounded-[2rem] border border-black/10 dark:border-white/20 bg-white/40 dark:bg-black/60 backdrop-blur-2xl overflow-hidden shadow-[0_0_80px_rgba(163,230,53,0.12)] p-2 sm:p-4">
               <div className="rounded-[1.5rem] border border-border/40 bg-background h-full overflow-hidden relative flex flex-col">
                 {/* Fake UI Header */}
                 <div className="h-12 border-b border-border/40 bg-surface/30 flex items-center px-4 gap-2 z-20 shrink-0">

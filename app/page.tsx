@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Github, Zap, Lock, FileText, LayoutDashboard, Terminal, CheckCircle2, Trophy, BarChart2, Shield, XCircle, Users, Target } from "lucide-react"
+import { ArrowRight, Github, Zap, Lock, FileText, LayoutDashboard, Terminal, CheckCircle2, Trophy, BarChart2, Shield, XCircle, Users, Target, UserCheck, BookOpen, TrendingUp } from "lucide-react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
 
@@ -434,7 +434,7 @@ export default function HomePage() {
                 {item.visual}
                 <div className="flex flex-col gap-2 flex-1 px-2">
                   <h3 className="text-base font-bold text-white/90 tracking-tight">{item.title}</h3>
-                  <p className="text-sm text-white/50 leading-relaxed">{item.body}</p>
+                              <p className="text-sm text-white/50 leading-relaxed">{item.body}</p>
                 </div>
               </motion.div>
             ))}
@@ -442,20 +442,23 @@ export default function HomePage() {
         </section>
 
         {/* Technical Features Grid */}
-        <section className="mb-24">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Everything you need to scale</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Built for modern revenue teams that want total control over their data, models, and scoring methodology.</p>
+        <section className="mb-24 relative">
+          {/* Ambient Background Glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-lime-500/5 rounded-full blur-[120px] -z-10 pointer-events-none" />
+          
+          <div className="text-center mb-16 relative z-10">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Coaching, not just intelligence</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Call intelligence tools tell you what happened. Playcall scores your reps against your playbook and the buyer context before telling them what to drill next.</p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
             {[
-              { icon: Lock, title: "Bring Your Own Key", desc: "Connect OpenAI, Anthropic, or any of 15+ LLMs per workspace. No vendor lock-in, no per-call markups. One team can run GPT-4o, another on Claude. No code changes required." },
-              { icon: FileText, title: "Multi-modal Parsing", desc: "Audio recordings, transcripts, PDFs, DOCX, PPTX — all parsed to text before scoring. Visual layouts, tables, and slide decks included." },
-              { icon: Zap, title: "Async Edge Pipeline", desc: "Uploads return immediately. Transcription, document parsing, buyer enrichment, and scoring run as chained background jobs with a local fallback." },
-              { icon: LayoutDashboard, title: "Role-based access", desc: "Managers see team performance, control playbooks, and manage reps. Sales reps see only their own calls, scores, and feedback." },
-              { icon: CheckCircle2, title: "No Generic Advice", desc: "Calls are scored strictly against your playbook criteria — your methodology, your sales motion, not one-size-fits-all AI feedback." },
-              { icon: Shield, title: "Self-Hostable", desc: "Fully open source. Deploy to your own Vercel and Supabase instances. Call recordings and transcripts never leave your infrastructure." }
+              { icon: CheckCircle2, title: "No Generic Advice", desc: "Calls are scored strictly against your playbook criteria: your methodology, your sales motion, not one-size-fits-all AI feedback." },
+              { icon: UserCheck, title: "Buyer-Aware Scoring", desc: "Company stage, contact role, and deal context dynamically shape every scorecard." },
+              { icon: BookOpen, title: "Your Methodology, Not Ours", desc: "Score against MEDDPICC, BANT, SPIN, or the framework you actually use. No framework? Paste your playbook and Playcall generates the rubric for you." },
+              { icon: TrendingUp, title: "Outcome-Tied Scoring", desc: "Every score directly links to the deal stage, ultimate outcome, and pipeline impact." },
+              { icon: Zap, title: "Coaching Drills, Not Just Feedback", desc: "Every score comes with a specific, actionable drill for the rep to run next." },
+              { icon: Shield, title: "Self-Hostable", desc: "Open source software. Deploy to your own infrastructure and keep your data secure." }
             ].map((feature, i) => (
               <motion.div 
                 key={i}
@@ -463,12 +466,12 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="group p-6 rounded-3xl border border-border/50 bg-surface/20 hover:bg-surface/40 transition-colors"
+                className="group p-6 rounded-[2rem] border border-border/40 bg-surface/20 backdrop-blur-sm hover:bg-surface/40 hover:border-lime-500/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-lime-500/5 hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="w-12 h-12 rounded-2xl bg-lime-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-12 h-12 rounded-2xl border border-lime-500/20 bg-lime-500/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-lime-500/20 transition-all duration-300 shadow-sm">
                   <feature.icon className="w-6 h-6 text-lime-600 dark:text-lime-400" />
                 </div>
-                <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
+                <h3 className="text-lg font-bold mb-2 text-foreground/90 group-hover:text-foreground transition-colors">{feature.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
               </motion.div>
             ))}

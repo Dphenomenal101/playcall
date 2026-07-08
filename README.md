@@ -2,7 +2,7 @@
 
 Score sales calls against your actual playbook and the buyer context, not generic AI advice.
 
-[Demo](https://playcall.dphenomenal.com) · [Stack](#stack) · [Prerequisites](#prerequisites) · [Setup](#setup) · [Running locally](#7-run-locally) · [Deploy](#deploying-to-production) · [Contributing](#contributing) · [Security](SECURITY.md)
+[Demo](https://playcall.dphenomenal.com) · [Setup](#setup) · [Deploy](#deploying-to-production) · [Security](SECURITY.md)
 
 ![Playcall app screenshot](docs/screenshots/playcall-screenshot.png)
 

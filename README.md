@@ -1,10 +1,19 @@
-# Playcall
+<p align="center">
+  <img src="docs/screenshots/playcall-screenshot.png" alt="Playcall app screenshot" />
+</p>
 
-Score sales calls against your actual playbook and the buyer context, not generic AI advice.
+<h1 align="center">Playcall</h1>
 
-[Demo](https://playcall.dphenomenal.com) · [Setup](#setup) · [Deploy](#deploying-to-production) · [Security](SECURITY.md)
+<p align="center">
+  Score sales calls against your actual playbook and buyer context, not generic AI advice.
+</p>
 
-![Playcall app screenshot](docs/screenshots/playcall-screenshot.png)
+<p align="center">
+  <strong><a href="https://playcall.dphenomenal.com">Demo</a></strong> ·
+  <strong><a href="#setup">Setup</a></strong> ·
+  <strong><a href="#deploying-to-production">Deploy</a></strong> ·
+  <strong><a href="SECURITY.md">Security</a></strong>
+</p>
 
 ## Stack
 

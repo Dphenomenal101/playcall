@@ -2,7 +2,7 @@
   <img src="docs/screenshots/playcall-screenshot.png" alt="Playcall app screenshot" />
 </p>
 
-<h1 align="center">Playcall</h1>
+<h1 align="center"><u>Playcall</u></h1>
 
 <p align="center">
   Score sales calls against your actual playbook and buyer context, not generic AI advice.

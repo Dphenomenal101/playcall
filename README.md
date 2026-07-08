@@ -1,8 +1,8 @@
 # Playcall
 
-Score sales calls against your actual playbook, not generic AI advice.
+Score sales calls against your actual playbook and the buyer context, not generic AI advice.
 
-[Stack](#stack) · [Prerequisites](#prerequisites) · [Setup](#setup) · [Running locally](#7-run-locally) · [Deploy](#deploying-to-production)
+[Demo](https://playcall.dphenomenal.com) · [Stack](#stack) · [Prerequisites](#prerequisites) · [Setup](#setup) · [Running locally](#7-run-locally) · [Deploy](#deploying-to-production) · [Contributing](#contributing) · [Security](SECURITY.md)
 
 ![Playcall app screenshot](docs/screenshots/playcall-screenshot.png)
 
@@ -22,7 +22,7 @@ Score sales calls against your actual playbook, not generic AI advice.
 - Node.js 20+ and pnpm
 - [Supabase](https://supabase.com) account
 - [Vercel](https://vercel.com) account
-- OpenAI API key (scoring + audio transcription)
+- [OpenAI](https://platform.openai.com/api-keys) API key (scoring + audio transcription)
 - [LlamaParse](https://cloud.llamaindex.ai) API key (free tier: 10k credits/month)
 - Enrichment key — [Exa](https://exa.ai) (`EXA_API_KEY`) or [TheHog](https://thehog.ai) (`THEHOG_ACCESS_KEY` + `THEHOG_SECRET_KEY`)
 
@@ -146,6 +146,19 @@ supabase/
   migrations/     Database schema
   functions/      Edge Functions (process-job)
 ```
+
+## Contributing
+
+Contributions are welcome.
+
+1. Fork the repo and create a feature branch.
+2. Run the app locally and verify your change in context.
+3. Keep changes focused and include any docs updates that make the behavior clearer.
+4. Open a pull request with a concise summary of what changed and why.
+
+If your change affects setup, deployment, or security assumptions, update [README.md](README.md) and [SECURITY.md](SECURITY.md) in the same PR.
+
+For security issues, do not open a public issue. Follow the reporting guidance in [SECURITY.md](SECURITY.md).
 
 ## License
 

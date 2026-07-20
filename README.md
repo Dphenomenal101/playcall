@@ -1,10 +1,11 @@
 <a href="https://playcall.dphenomenal.com">
   <img src="docs/screenshots/playcall-screenshot.png" alt="Playcall app screenshot" />
-  <h1 align="center">Playcall</h1>
+  <h1 align="center">Playcall: The open-source AI alternative to Gong.
+</h1>
 </a>
 
 <p align="center">
-  Score sales calls against your actual playbook and buyer context, not generic AI advice.
+Most call scorers grade what you said. Playcall grades whether what you said was right for who you were talking to.
 </p>
 
 <p align="center">

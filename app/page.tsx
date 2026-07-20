@@ -93,13 +93,13 @@ export default function HomePage() {
           animate="animate"
           className="text-center max-w-4xl mx-auto mb-10"
         >
-          <motion.h1 variants={fadeInUp} className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.05] mb-8">
-            Score sales calls against <br className="hidden sm:block" />
+          <motion.h1 variants={fadeInUp} className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tighter leading-[1.05] mb-8 text-white drop-shadow-2xl">
+            The open-source AI <br className="hidden sm:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-500 to-emerald-400 dark:from-lime-400 dark:to-emerald-300">
-              your actual{" "}
+              alternative to{" "}
             </span>
             <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-lime-500 to-emerald-400 dark:from-lime-400 dark:to-emerald-300">
-              playbook
+              Gong
               <svg className="absolute top-full mt-2 left-0 w-full overflow-visible" viewBox="0 0 160 32" fill="none" preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="ul-grad" x1="0" y1="0" x2="160" y2="0" gradientUnits="userSpaceOnUse">
@@ -113,7 +113,7 @@ export default function HomePage() {
                      C145 8, 90 13, 40 11, 5 12
                      C35 16, 85 20, 135 17, 155 18"
                   stroke="url(#ul-grad)"
-                  strokeWidth="4"
+                  strokeWidth="8"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   fill="none"
@@ -122,8 +122,9 @@ export default function HomePage() {
             </span>
           </motion.h1>
           
-          <motion.p variants={fadeInUp} className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-          Generic call summaries bury the data that helps deals close. Upload your playbook and let Playcall grade whether your reps said the right thing to the right buyer.
+          
+          <motion.p variants={fadeInUp} className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed font-medium">
+            Call intelligence tools tell you what your rep said. Playcall scores it against your playbook and the buyer context. The account, contact, and deal stage.
           </motion.p>
           
           <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -153,10 +154,10 @@ export default function HomePage() {
         </motion.section>
 
         {/* Dashboard Preview / Glassmorphism UI */}
-        <section ref={containerRef} className="h-[100vh] relative mb-0">
+        <section ref={containerRef} className="h-[100vh] max-h-[1000px] relative mb-0">
           <motion.div 
             style={{ scale }}
-            className="sticky top-20 h-[85vh] select-none pointer-events-none"
+            className="sticky top-20 h-[85vh] max-h-[800px] select-none pointer-events-none"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-lime/20 via-lime/5 to-transparent blur-[80px] -z-10 rounded-[3rem]" />
             <div className="relative h-full rounded-[2rem] border border-black/10 dark:border-white/20 bg-white/40 dark:bg-black/60 backdrop-blur-2xl overflow-hidden shadow-[0_0_80px_rgba(163,230,53,0.12)] p-2 sm:p-4">
@@ -448,17 +449,17 @@ export default function HomePage() {
           
           <div className="text-center mb-16 relative z-10">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Coaching, not just intelligence</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Call intelligence tools tell you what happened. Playcall scores your reps against your playbook and the buyer context before telling them what to drill next.</p>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Gong tells you what happened. Playcall tells you what was right, wrong, and what to drill next.</p>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
             {[
-              { icon: CheckCircle2, title: "No Generic Advice", desc: "Calls are scored strictly against your playbook criteria: your methodology, your sales motion, not one-size-fits-all AI feedback." },
-              { icon: UserCheck, title: "Buyer-Aware Scoring", desc: "Company stage, contact role, and deal context dynamically shape every scorecard." },
-              { icon: BookOpen, title: "Your Methodology, Not Ours", desc: "Score against MEDDPICC, BANT, SPIN, or the framework you actually use. No framework? Paste your playbook and Playcall generates the rubric for you." },
-              { icon: TrendingUp, title: "Outcome-Tied Scoring", desc: "Every score directly links to the deal stage, ultimate outcome, and pipeline impact." },
-              { icon: Zap, title: "Coaching Drills, Not Just Feedback", desc: "Every score comes with a specific, actionable drill for the rep to run next." },
-              { icon: Shield, title: "Self-Hostable", desc: "Open source software. Deploy to your own infrastructure and keep your data secure." }
+              { icon: CheckCircle2, title: "No generic advice", desc: "Calls are scored strictly against your playbook criteria: your methodology, your sales motion, not one-size-fits-all AI feedback." },
+              { icon: UserCheck, title: "Buyer-aware scoring", desc: "Company stage, contact role, and deal context dynamically shape every scorecard." },
+              { icon: BookOpen, title: "Your methodology, not ours", desc: "Score against MEDDPICC, BANT, SPIN, or the framework you actually use. No framework? Paste your playbook and Playcall generates the rubric for you." },
+              { icon: TrendingUp, title: "Outcome-tied scoring", desc: "Every score directly links to the deal stage, ultimate outcome, and pipeline impact." },
+              { icon: Zap, title: "Coaching drills, not just feedback", desc: "Every score comes with a specific, actionable drill for the rep to run next." },
+              { icon: Shield, title: "Self-hostable", desc: "Open source software. Deploy to your own infrastructure and keep your data secure." }
             ].map((feature, i) => (
               <motion.div 
                 key={i}
@@ -488,7 +489,7 @@ export default function HomePage() {
             <div className="inline-flex items-center justify-center px-4 py-1.5 mb-6 rounded-full border border-lime-500/20 bg-lime-500/10 text-lime-500 text-[10px] font-mono font-bold tracking-[0.2em] uppercase shadow-[0_0_15px_rgba(163,230,53,0.1)]">
               Bring Your Own Key
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Plug & play with any model</h2>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Plug & play with any LLM</h2>
           </div>
 
           <div className="relative z-20 w-full max-w-6xl mx-auto overflow-hidden" style={{ maskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)" }}>
@@ -561,7 +562,7 @@ export default function HomePage() {
             <div className="flex-1 text-center md:text-left">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Deploy in minutes</h2>
               <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto md:mx-0">
-                Playcall is fully open source. Spin up your own instance on Vercel and Supabase for free.
+                No $30K contracts or 10+ features your team never touches. No vendor lock-in. Playcall is fully open source. Spin up your own instance on Vercel and Supabase for free.
               </p>
               <Link
                 href={`${GITHUB_URL}#readme`}

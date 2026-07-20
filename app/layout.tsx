@@ -11,8 +11,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Playcall | Open-source AI sales coaching OS for GTM teams",
-  description: "An open-source AI sales call coach that scores reps against your actual playbook. Upload your methodology and track real adherence.",
+  title: "Playcall | The open-source AI alternative to Gong",
+  description: "Call intelligence tools tell you what your rep said. Playcall scores it against your playbook and the buyer context.",
   keywords: [
     "Sales Coaching",
     "AI Sales Coach",
@@ -20,15 +20,20 @@ export const metadata: Metadata = {
     "Call Scoring",
     "Open Source Sales",
     "Playbook Adherence",
-    "Sales Enablement"
+    "Sales Enablement",
+    "Gong Alternative",
+    "Chorus Alternative",
+    "Open Source Gong",
+    "Conversation Intelligence",
+    "Call Intelligence"
   ],
   authors: [{ name: "Phenomenal" }],
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://playcall.dphenomenal.com",
-    title: "Playcall | Open-source AI sales coaching OS",
-    description: "Score sales calls against your actual playbook using your own AI models. No generic advice, just actionable insights.",
+    title: "Playcall | The open-source AI alternative to Gong",
+    description: "Call intelligence tools tell you what your rep said. Playcall scores it against your playbook and the buyer context.",
     siteName: "Playcall",
   },
   twitter: {

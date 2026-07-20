@@ -43,3 +43,6 @@ TODO.md
 
 # supabase CLI local state
 supabase/.temp/
+
+# ph-slides
+/app/ph-slides/
